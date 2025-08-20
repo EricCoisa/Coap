@@ -45,21 +45,21 @@ function BaseObject(props: BaseObjectProps) {
   }
 
   // Eventos do ícone de arrastar
-  function handleDragIconMouseEnter(e: React.MouseEvent<HTMLDivElement>) {
+  function handleDragIconMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
     e.currentTarget.style.background = '#005a9e';
     e.currentTarget.style.transform = 'scale(1.1)';
   }
 
-  function handleDragIconMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
+  function handleDragIconMouseLeave(e: React.MouseEvent<HTMLButtonElement>) {
     e.currentTarget.style.background = '#007acc';
     e.currentTarget.style.transform = 'scale(1)';
   }
 
-  function handleDragIconMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+  function handleDragIconMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
     e.currentTarget.style.cursor = 'grabbing';
   }
 
-  function handleDragIconMouseUp(e: React.MouseEvent<HTMLDivElement>) {
+  function handleDragIconMouseUp(e: React.MouseEvent<HTMLButtonElement>) {
     e.currentTarget.style.cursor = 'grab';
   }
 
@@ -74,7 +74,7 @@ function BaseObject(props: BaseObjectProps) {
     e.currentTarget.style.transform = 'scale(1)';
   }
 
-  function handleDragStart(e: React.DragEvent<HTMLDivElement>) {
+  function handleDragStart(e: React.DragEvent<HTMLButtonElement>) {
     console.log(`🚀 Drag Start - Objeto ${props.object.id}`);
     setIsDragging(true);
     globalDragState.isDragging = true;

@@ -2,8 +2,9 @@ import type { IBaseObjectProps } from "../../components/objects/BaseObject.tsx";
 import Text from "../../components/objects/text/text.tsx";
 import RichText from "../../components/objects/richtext/richtext.tsx";
 import type { TextData } from "../../components/objects/text/text.tsx";
+import type { TitleData } from "../../components/objects/title/title.tsx";
 
-export type ObjectType = 'title' | 'text' | 'image' | 'richtext';
+export type ObjectType = 'title' | 'text';
 export type ObjectMode = 'edit' | 'view';
 
 export interface Object<T = Record<string, unknown>> {
@@ -39,18 +40,7 @@ export const InitialObjects = [
       content: 'Título de Exemplo',
       fontSize: '24px',
       color: '#333333'
-    } as TextData
-  },
-  {
-    id: "2",
-    type: 'text' as ObjectType,
-    label: 'Parágrafo',
-    icon: '📄',
-    data: {
-      content: 'Este é um parágrafo de exemplo com mais conteúdo para testar.',
-      fontSize: '14px',
-      color: '#666666'
-    } as TextData
+    } as TitleData
   }
 ] as AnyObject[];
 

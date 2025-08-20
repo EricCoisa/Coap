@@ -2,7 +2,9 @@ import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 import BaseObject, { type IBaseObjectProps } from '../BaseObject';
 import { EditObject } from '../../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../../store/rootReducer';
-import RichText from '../richtext/richtext';
+import RichText, { type RichTextResponse } from '../richtext/richtext';
+import { TextContainer } from './title.styles';
+import type { Delta } from 'quill';
 
 const connector = connectUtil(
   (_state : RootStateBase) => ({
@@ -11,8 +13,8 @@ const connector = connectUtil(
   { EditObject}
 );
 
-export interface TextData  {
-  content: string,
+export interface TitleData  {
+  content: Delta | string, // Pode ser Delta ou string dependendo do modo
   fontSize: string,
   color: string
 }
@@ -20,42 +22,24 @@ export interface TextData  {
 export interface TitleProps extends IBaseObjectProps, PropsFromRedux<typeof connector> {
 }
 
-function TextObject(props: TitleProps) {
-  const data = props.object.data as unknown as TextData; // Garantir que data é do deste elemento
-
-  function handleContentChange(value: string) {
-    props.EditObject(props.object.id, { ...props.object.data, content: value });
+function TitleObject(props: TitleProps) {
+  const data = props.object.data as unknown as TitleData; // Garantir que data é do deste elemento
+  function handleContentChange(value: RichTextResponse) {
+    props.EditObject(props.object.id, { ...props.object.data, content: value.delta });
   }
 
   return (
     <BaseObject object={props.object} index={props.index} mode={props.mode}>
-      <div style={{ fontSize: 12, color: '#000000', padding: '8px' }}>
-
-        {props.mode === 'edit' ? (
-          <RichText
+      <TextContainer>
+        <RichText
           value={data.content}
           setValue={handleContentChange}
           mode={props.mode}
-          style={{
-              width: '100%',
-              minHeight: '60px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              padding: '8px',
-              fontSize: 12,
-              color: '#000000',
-              resize: 'vertical'
-            }}
-          />
-        ) : (
-          <div style={{ padding: '8px', fontSize: 12, color: '#000000' }}>
-            {data.content}
-          </div>
-        )}
-      </div>
+        />
+      </TextContainer>
     </BaseObject>
   );
 }
 
-const ConnectedTextObject = connector(TextObject);
+const ConnectedTextObject = connector(TitleObject);
 export default ConnectedTextObject;
