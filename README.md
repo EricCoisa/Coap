@@ -1,54 +1,148 @@
-# Coap
-Construtor de Objeto de Aprendizagem
+# 🎓 Coap - Construtor de Objetos de Aprendizagem
 
-## 📌 Contexto do Projeto
-O Coap é uma aplicação voltada para a criação e visualização de materiais didáticos interativos. Seu propósito é oferecer uma ferramenta simples e flexível, semelhante ao Wix ou Canvas simplificado, permitindo que o usuário monte conteúdos educacionais através de objetos reutilizáveis (texto, título, imagem, vídeo, etc.).
+> Uma plataforma moderna e intuitiva para criação de materiais didáticos interativos
 
-## 🎯 Objetivo
-Facilitar a montagem de conteúdos educacionais interativos, permitindo a reutilização de objetos e componentes, com foco em simplicidade e flexibilidade.
+[![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.1-purple?logo=vite)](https://vitejs.dev/)
+[![Styled Components](https://img.shields.io/badge/Styled--Components-6.0-pink?logo=styled-components)](https://styled-components.com/)
 
-## ⚙️ Estrutura
-O projeto se divide em dois módulos principais:
+## ✨ O que é o Coap?
+
+O **Coap** é uma ferramenta visual drag-and-drop para criação de conteúdos educacionais, similar ao Canva ou Wix, mas focada especificamente em materiais didáticos. Com uma interface intuitiva, permite que educadores, designers instrucionais e criadores de conteúdo montem rapidamente materiais interativos sem necessidade de conhecimento técnico.
+
+### 🚀 Principais Funcionalidades
+
+- **📝 Editor Visual**: Interface drag-and-drop para montagem de conteúdo
+- **🔄 Preview em Tempo Real**: Visualização instantânea do resultado final
+- **✏️ Rich Text Editor**: Editor de texto rico integrado com Quill.js
+- **🎨 Objetos Reutilizáveis**: Componentes modulares (texto, título, imagem, etc.)
+- **📱 Responsivo**: Adapta-se a diferentes tamanhos de tela
+- **🔧 Altamente Customizável**: Toolbar e formatos personalizáveis
+
+## 🎥 Demo
+
+![Coap Demo](./demo.gif)
+
+*Editor visual com objetos sendo adicionados e editados em tempo real*
+
+## 🛠️ Tecnologias Utilizadas
+
+### Frontend
+- **React 19** - Framework principal
+- **TypeScript** - Tipagem estática
+- **Vite** - Build tool e dev server
+- **Styled Components** - CSS-in-JS
+- **Redux Toolkit** - Gerenciamento de estado
 
 ### Editor
-- Área de trabalho onde o usuário pode adicionar, mover e remover objetos.
-- Editar conteúdos por meio de inputs e rich text (via Quill).
-- Fazer upload de imagens e configurar propriedades.
-- Cada objeto possui um modo de edição, exibindo campos interativos (inputs, upload, quill).
+- **Quill.js** - Editor de texto rico
+- **React DnD** - Drag and drop (planejado)
 
-### Preview
-- Exibe os objetos criados no modo somente leitura.
-- Utiliza os mesmos componentes do Editor, mas com a prop `mode="preview"`, ocultando elementos de edição.
+## 🏗️ Arquitetura do Sistema
 
-## 📦 Componentes do Projeto
-Os objetos (título, texto, imagem, vídeo, etc.) são implementados como componentes reutilizáveis. Cada componente suporta dois modos:
+### 📋 Editor
+O módulo de edição oferece:
+- Sidebar com paleta de objetos disponíveis
+- Canvas principal para montagem do conteúdo
+- Propriedades editáveis para cada objeto
+- Sistema de drag-and-drop para organização
 
-- `editor` → habilita inputs e campos de edição.
-- `preview` → exibe apenas o resultado final.
+### 👁️ Preview
+O módulo de visualização:
+- Renderiza o conteúdo no modo somente leitura
+- Utiliza os mesmos componentes, mas em modo `view`
+- Ideal para apresentação e validação do material
 
-**Exemplo:**
-`ImageObject` → mostra Quill para título, upload no modo editor, mas renderiza apenas `<img>` e source no preview.
+### 🧱 Objetos Suportados
 
-## 🛠️ Padrões de Desenvolvimento
+| Objeto | Descrição | Funcionalidades |
+|--------|-----------|----------------|
+| **Texto** | Conteúdo textual rico | Formatação, cores, alinhamento |
+| **Título** | Cabeçalhos e títulos | Diferentes tamanhos, estilos |
+| **Imagem** | Mídia visual | Upload, redimensionamento |
+| **RichText** | Editor avançado | Toolbar customizável, formatos flexíveis |
 
-### Componentes
-- Criados em arquivos isolados (`objectName.tsx`).
-- Exportados como default.
-- Usam styled-components em arquivo separado (`objectName.style.ts`).
+## 🚀 Como Executar
 
-### Tipagem
-- Tipos globais ficam em `src/types/objects.ts`.
-- Exemplo:
-```typescript
-export type ObjectMode = "editor" | "preview";
+### Pré-requisitos
+- Node.js 18+
+- npm ou yarn
+
+### Instalação
+```bash
+# Clone o repositório
+git clone https://github.com/EricCoisa/Coap.git
+
+# Entre no diretório
+cd Coap
+
+# Instale as dependências
+npm install
+
+# Execute o projeto
+npm run dev
 ```
 
-### Editor de Texto
-- Usaremos React Quill para inputs ricos.
-- Configurações diferentes para cada tipo de objeto (exemplo: Título com toolbar minimalista, Texto com opções mais abertas).
+Acesse `http://localhost:5173` para ver a aplicação em funcionamento.
 
-## 🔮 Futuro / Extensões
-- Suporte a arrastar e soltar (drag & drop) para organizar objetos.
-- Sistema de templates de material pré-definidos.
-- Exportação do conteúdo em JSON, para persistência e compartilhamento.
-- Integração com plataformas de EAD.
+## 📖 Como Usar
+
+1. **Adicione Objetos**: Arraste elementos da sidebar para o canvas
+2. **Edite Conteúdo**: Clique nos objetos para editá-los
+3. **Visualize**: Use o preview para ver o resultado final
+4. **Organize**: Reordene os elementos conforme necessário
+
+## 🎯 Casos de Uso
+
+- **Educadores**: Criação de materiais didáticos interativos
+- **Designers Instrucionais**: Prototipagem rápida de conteúdos
+- **Instituições de Ensino**: Padronização de materiais educacionais
+- **Cursos Online**: Criação de lições e módulos
+
+## 🔧 Customização
+
+### Rich Text Editor
+```tsx
+<RichText
+  value={content}
+  setValue={handleChange}
+  mode="edit"
+  toolbar={[
+    ['bold', 'italic'],
+    [{ 'header': [1, 2, 3] }],
+    ['clean']
+  ]}
+  formats={['bold', 'italic', 'header']}
+/>
+```
+
+### Objetos Personalizados
+O sistema é extensível - novos tipos de objetos podem ser facilmente adicionados seguindo o padrão de interfaces existente.
+
+## �️ Roadmap
+
+- [ ] Sistema completo de drag-and-drop
+- [ ] Templates pré-definidos
+- [ ] Exportação em múltiplos formatos
+- [ ] Colaboração em tempo real
+- [ ] Biblioteca de assets
+- [ ] Integração com LMS
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Veja nossa [documentação de contribuição](CONTRIBUTING.md) para mais detalhes.
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 👨‍💻 Autor
+
+**Eric** - [GitHub](https://github.com/EricCoisa)
+
+---
+
+<p align="center">
+  Feito com ❤️ para democratizar a criação de conteúdos educacionais
+</p>
