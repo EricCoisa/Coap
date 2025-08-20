@@ -1,6 +1,6 @@
 
 import { CURRENTLANGUAGE_SET, LOWPERFORMANCE_SET, OBJECTSLIST_SET as OBJECTSLIST_SET, OBJECTSUSED_ADD, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, OBJECTSUSED_EDIT, type ApplicationState, type ApplicationTypes } from '../../../types/application';
-import { InitialObjects, type Object } from '../../../types/objects';
+import { InitialObjects, type AnyObject } from '../../../types/objects';
 
 const INITIAL_STATE: ApplicationState = {
     currentLanguage: 'pt',
@@ -25,13 +25,30 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
                     return v.toString(16);
                 });
             }
+            
+            const { object, position } = action.payload;
             const newObject = {
-                ...action.payload,
+                ...object,
                 id: generateGuid()
             };
+            
+            const currentList = state.ObjectsUsed || [];
+            
+            // Se uma posição foi especificada, inserir nessa posição
+            if (typeof position === 'number') {
+                const newList = [...currentList];
+                const insertIndex = Math.max(0, Math.min(position, currentList.length));
+                newList.splice(insertIndex, 0, newObject);
+                return {
+                    ...state,
+                    ObjectsUsed: newList
+                };
+            }
+            
+            // Caso contrário, adicionar no final (comportamento padrão)
             return {
                 ...state,
-                ObjectsUsed: state.ObjectsUsed ? [...state.ObjectsUsed, newObject] : [newObject]
+                ObjectsUsed: [...currentList, newObject]
             };
         }
         case OBJECTSUSED_REMOVE: {
@@ -41,13 +58,13 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
 
             const r = {
                 ...state,
-                ObjectsUsed: state.ObjectsUsed ? state.ObjectsUsed.filter((obj: Object) => String(obj.id) !== removeId) : []
+                ObjectsUsed: state.ObjectsUsed ? state.ObjectsUsed.filter((obj: AnyObject) => String(obj.id) !== removeId) : []
             }
 
             console.log("r", r)
             return {
                 ...state,
-                ObjectsUsed: state.ObjectsUsed ? state.ObjectsUsed.filter((obj: Object) => String(obj.id) !== removeId) : []
+                ObjectsUsed: state.ObjectsUsed ? state.ObjectsUsed.filter((obj: AnyObject) => String(obj.id) !== removeId) : []
             };
         }
         case OBJECTSUSED_MOVE: {
@@ -55,17 +72,22 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
             const { object, to } = action.payload;
             
             // Encontrar o índice atual do objeto
-            const currentIndex = state.ObjectsUsed.findIndex((obj: Object) => obj.id === object.id);
+            const currentIndex = state.ObjectsUsed.findIndex((obj: AnyObject) => obj.id === object.id);
             if (currentIndex === -1) return state; // Objeto não encontrado
             
-            // Criar uma nova lista sem o objeto atual
-            const newList = [...state.ObjectsUsed];
-            newList.splice(currentIndex, 1); // Remove o objeto da posição atual
+            // Se está tentando mover para a mesma posição, não fazer nada
+            if (currentIndex === to) return state;
             
-            // Ajustar o índice de destino se necessário
+            // Criar uma nova lista
+            const newList = [...state.ObjectsUsed];
+            
+            // Remover o objeto da posição atual
+            newList.splice(currentIndex, 1);
+            
+            // Calcular a nova posição após a remoção
             let targetIndex = to;
             if (currentIndex < to) {
-                targetIndex = to - 1; // Se movendo para frente, ajustar o índice
+                targetIndex = to - 1; // Ajustar porque removemos um item antes
             }
             
             // Garantir que o índice esteja dentro dos limites
@@ -85,7 +107,7 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
             const { id, data } = action.payload;
             return {
                 ...state,
-                ObjectsUsed: state.ObjectsUsed.map((obj: Object) =>
+                ObjectsUsed: state.ObjectsUsed.map((obj: AnyObject) =>
                     obj.id === id ? { ...obj, data:data } : obj
                 )
             };

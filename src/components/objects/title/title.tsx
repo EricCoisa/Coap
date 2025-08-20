@@ -2,9 +2,7 @@ import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 import BaseObject, { type IBaseObjectProps } from '../BaseObject';
 import { EditObject } from '../../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../../store/rootReducer';
-import RichText, { type RichTextResponse } from '../richtext/richtext';
-import { TextContainer } from './text.styles';
-import type { Delta } from 'quill';
+import RichText from '../richtext/richtext';
 
 const connector = connectUtil(
   (_state : RootStateBase) => ({
@@ -14,29 +12,47 @@ const connector = connectUtil(
 );
 
 export interface TextData  {
-  content: Delta | string, // Pode ser Delta ou string dependendo do modo
+  content: string,
   fontSize: string,
   color: string
 }
 
-export interface TextProps extends IBaseObjectProps, PropsFromRedux<typeof connector> {
+export interface TitleProps extends IBaseObjectProps, PropsFromRedux<typeof connector> {
 }
 
-function TextObject(props: TextProps) {
+function TextObject(props: TitleProps) {
   const data = props.object.data as unknown as TextData; // Garantir que data é do deste elemento
-  function handleContentChange(value: RichTextResponse) {
-    props.EditObject(props.object.id, { ...props.object.data, content: value.delta });
+
+  function handleContentChange(value: string) {
+    props.EditObject(props.object.id, { ...props.object.data, content: value });
   }
 
   return (
     <BaseObject object={props.object} index={props.index} mode={props.mode}>
-      <TextContainer>
-        <RichText
+      <div style={{ fontSize: 12, color: '#000000', padding: '8px' }}>
+
+        {props.mode === 'edit' ? (
+          <RichText
           value={data.content}
           setValue={handleContentChange}
           mode={props.mode}
-        />
-      </TextContainer>
+          style={{
+              width: '100%',
+              minHeight: '60px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              padding: '8px',
+              fontSize: 12,
+              color: '#000000',
+              resize: 'vertical'
+            }}
+          />
+        ) : (
+          <div style={{ padding: '8px', fontSize: 12, color: '#000000' }}>
+            {data.content}
+          </div>
+        )}
+      </div>
     </BaseObject>
   );
 }

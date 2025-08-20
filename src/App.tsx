@@ -29,11 +29,6 @@ function App() {
     // TODO: Implementar lógica de importação
   }
 
-  function handleAddObject(type: string) {
-    console.log(`Adicionando objeto do tipo: ${type}`)
-    // TODO: Implementar lógica de adição de objetos
-  }
-
   return (
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyles />
@@ -46,7 +41,7 @@ function App() {
       />
       
       {currentMode === 'editor' ? (
-        <Editor onAddObject={handleAddObject} />
+        <Editor />
       ) : (
         <Preview />
       )}

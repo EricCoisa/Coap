@@ -7,34 +7,37 @@ export const OBJECTSUSED_REMOVE = 'OBJECTSUSED_REMOVE';
 export const OBJECTSUSED_MOVE = 'OBJECTSUSED_MOVE';
 export const OBJECTSUSED_EDIT = 'OBJECTSUSED_EDIT';
 
-import type { AnyObject, Object } from '../objects';
+import type { AnyObject } from '../objects';
 
 export interface ApplicationState {
     currentLanguage: string;
     isLowPerformance: boolean;
     ObjectsList?: AnyObject[];
-    ObjectsUsed?: Object[];
+    ObjectsUsed?: AnyObject[];
 }
 
 export interface ApplicationObjectsListAction {
     type: typeof OBJECTSLIST_SET;
-    payload: Object[];
+    payload: AnyObject[];
 }
 
 export interface ApplicationObjectsUsedAddAction {
     type: typeof OBJECTSUSED_ADD;
-    payload: Object;
+    payload: {
+        object: AnyObject;
+        position?: number;
+    };
 }
 
 export interface ApplicationObjectsUsedRemoveAction {
     type: typeof OBJECTSUSED_REMOVE;
-    payload: Object;
+    payload: AnyObject;
 }
 
 export interface ApplicationObjectsUsedMoveAction {
     type: typeof OBJECTSUSED_MOVE;
     payload: {
-        object: Object;
+        object: AnyObject;
         to: number;
     };
 }

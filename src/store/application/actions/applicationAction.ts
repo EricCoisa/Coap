@@ -2,7 +2,7 @@
 import type { AppThunk } from "../../../utils/reduxUtil";
 import i18n from '../../../i18n';
 import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE } from "../../../types/application";
-import type { Object } from "../../../types/objects";
+import type { AnyObject } from "../../../types/objects";
 
 
 export function SetCurrentLanguage(language: string): AppThunk {
@@ -27,16 +27,16 @@ export function EditObject(id: string, data: Record<string, unknown>): AppThunk 
     };
 }
 
-export function AddObject(object: Object): AppThunk {
+export function AddObject(object: AnyObject, position?: number): AppThunk {
     return async function dispatchAddObject(dispatch) {
         dispatch({
-            payload: object,
+            payload: { object, position },
             type: OBJECTSUSED_ADD
         });
     };
 }
 
-export function RemoveObject(object: Object): AppThunk {
+export function RemoveObject(object: AnyObject): AppThunk {
     return async function dispatchRemoveObject(dispatch) {
         dispatch({
             payload: object,
@@ -45,7 +45,7 @@ export function RemoveObject(object: Object): AppThunk {
     };
 }
 
-export function MoveObject(object: Object, to: number): AppThunk {
+export function MoveObject(object: AnyObject, to: number): AppThunk {
     return async function dispatchMoveObject(dispatch) {
         dispatch({
             payload: { object, to },

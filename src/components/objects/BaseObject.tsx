@@ -1,175 +1,304 @@
 import React, { useState } from 'react';
-import { MoveObject, RemoveObject } from '../../store/application/actions/applicationAction';
+import { MoveObject, RemoveObject, AddObject } from '../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps } from '../../types';
-import type { Object, ObjectMode } from '../../types/objects/index';
+import type { AnyObject, ObjectMode } from '../../types/objects/index';
 
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
+import { globalDragState } from '../../utils/dragState';
+import {
+  BaseObjectContainer,
+  ActionButtonsContainer,
+  DragIcon,
+  RemoveButton,
+  DropZoneTop,
+  DropZoneBottom,
+  DropZoneContent
+} from './baseObject.styles';
 
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
     objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? []
   }),
-  { RemoveObject, MoveObject }
+  { RemoveObject, MoveObject, AddObject }
 );
 
 export interface IBaseObjectProps {
-    object: Object
-    index: number
-    mode: ObjectMode;
+  object: AnyObject
+  index: number
+  mode: ObjectMode;
 }
 
 export interface BaseObjectProps extends BaseComponentProps, IBaseObjectProps, PropsFromRedux<typeof connector> {
 }
 
-function BaseObject(props : BaseObjectProps) {
+function BaseObject(props: BaseObjectProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOverPosition, setDragOverPosition] = useState<'top' | 'bottom' | null>(null);
+  const [showDropZones, setShowDropZones] = useState(false);
+  const [activeDropZone, setActiveDropZone] = useState<'top' | 'bottom' | null>(null);
 
   function handleRemove() {
-    console.log('Removendo objeto:', props.object);
     if (props.RemoveObject && props.object) {
       props.RemoveObject(props.object);
     }
   }
 
+  // Eventos do ícone de arrastar
+  function handleDragIconMouseEnter(e: React.MouseEvent<HTMLDivElement>) {
+    e.currentTarget.style.background = '#005a9e';
+    e.currentTarget.style.transform = 'scale(1.1)';
+  }
+
+  function handleDragIconMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
+    e.currentTarget.style.background = '#007acc';
+    e.currentTarget.style.transform = 'scale(1)';
+  }
+
+  function handleDragIconMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    e.currentTarget.style.cursor = 'grabbing';
+  }
+
+  function handleDragIconMouseUp(e: React.MouseEvent<HTMLDivElement>) {
+    e.currentTarget.style.cursor = 'grab';
+  }
+
+  // Eventos do botão de remover
+  function handleRemoveButtonMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
+    e.currentTarget.style.background = '#c53030';
+    e.currentTarget.style.transform = 'scale(1.05)';
+  }
+
+  function handleRemoveButtonMouseLeave(e: React.MouseEvent<HTMLButtonElement>) {
+    e.currentTarget.style.background = '#e53e3e';
+    e.currentTarget.style.transform = 'scale(1)';
+  }
+
   function handleDragStart(e: React.DragEvent<HTMLDivElement>) {
+    console.log(`🚀 Drag Start - Objeto ${props.object.id}`);
     setIsDragging(true);
+    globalDragState.isDragging = true;
+    globalDragState.draggedObjectId = props.object.id;
+    globalDragState.isSidebarDrag = false;
+
     e.dataTransfer.setData('objectId', props.object.id.toString());
     e.dataTransfer.setData('draggedIndex', props.index.toString());
     e.dataTransfer.effectAllowed = 'move';
   }
 
   function handleDragEnd() {
+    console.log(`🏁 Drag End - Objeto ${props.object.id}`);
     setIsDragging(false);
-    setDragOverPosition(null);
+    setShowDropZones(false);
+    setActiveDropZone(null);
+    globalDragState.isDragging = false;
+    globalDragState.draggedObjectId = null;
+    globalDragState.isSidebarDrag = false;
   }
-  
-  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+
+  // Detecta quando um objeto está sendo arrastado sobre este elemento
+  function handleDragEnter(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    
-    const draggedId = e.dataTransfer.getData('objectId');
-    const draggedIndex = Number(e.dataTransfer.getData('draggedIndex'));
-    
-    if (draggedId === props.object.id) {
-      setDragOverPosition(null);
-      return; // Não move para si mesmo
-    }
 
-    if (props.MoveObject && draggedId && !isNaN(draggedIndex)) {
-      const draggedObject = props.objectsUsed.find(obj => obj.id === draggedId);
-      if (draggedObject) {
-        let newIndex = props.index;
-        
-        // Se estamos arrastando para baixo na metade inferior, inserir após
-        if (dragOverPosition === 'bottom') {
-          newIndex = props.index + 1;
-        }
-        // Se o objeto arrastado estava antes da posição atual, ajustar o índice
-        else if (draggedIndex < props.index) {
-          newIndex = props.index;
-        }
-        
-        props.MoveObject(draggedObject, newIndex);
-      }
+    // Verifica se há algo sendo arrastado e não é o próprio elemento
+    if (globalDragState.isDragging && globalDragState.draggedObjectId !== props.object.id) {
+      setShowDropZones(true);
+    } else if (globalDragState.isSidebarDrag) {
+      setShowDropZones(true);
     }
-    
-    setDragOverPosition(null);
   }
 
+  // Detecta movimento do mouse sobre o elemento durante drag
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    
-    const draggedId = e.dataTransfer.getData('objectId');
-    if (draggedId === props.object.id) return; // Não mostrar indicador para si mesmo
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
-    const mouseY = e.clientY;
-    
-    if (mouseY < midpoint) {
-      setDragOverPosition('top');
-    } else {
-      setDragOverPosition('bottom');
+
+    // Verifica se há algo sendo arrastado e não é o próprio elemento
+    if (globalDragState.isDragging && globalDragState.draggedObjectId !== props.object.id) {
+      setShowDropZones(true);
+    } else if (globalDragState.isSidebarDrag) {
+      setShowDropZones(true);
     }
   }
 
+  // Remove as zonas de drop quando sai do elemento
   function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
-    // Só remove o indicador se estivermos realmente saindo do elemento
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setDragOverPosition(null);
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Verifica se realmente saiu do container principal (não apenas mudou para uma drop zone)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    // Só remove as drop zones se o mouse realmente saiu da área do container
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setShowDropZones(false);
+      setActiveDropZone(null);
     }
+  }
+
+  // Handlers para as zonas de drop específicas
+  function handleTopZoneDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDropZone('top');
+  }
+
+  function handleBottomZoneDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDropZone('bottom');
+  }
+
+  function handleTopZoneDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const draggedId = e.dataTransfer.getData('objectId');
+    const sidebarObjectData = e.dataTransfer.getData('sidebarObjectData');
+
+    // Se é um elemento da sidebar sendo arrastado
+    if (sidebarObjectData && props.AddObject) {
+      try {
+        const sidebarObject = JSON.parse(sidebarObjectData);
+        const insertIndex = props.index; // Inserir acima
+
+        const newObject = {
+          ...sidebarObject,
+          id: undefined
+        };
+
+        props.AddObject(newObject, insertIndex);
+
+      } catch (error) {
+        console.error('Erro ao processar objeto da sidebar:', error);
+      }
+    }
+    // Se é um objeto existente sendo movido
+    else if (draggedId) {
+      const draggedObject = props.objectsUsed.find(obj => obj.id === draggedId);
+      if (draggedObject && props.MoveObject) {
+        const newIndex = props.index; // Mover para acima
+        props.MoveObject(draggedObject, newIndex);
+      }
+    }
+
+    setShowDropZones(false);
+    setActiveDropZone(null);
+  }
+
+  function handleBottomZoneDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const draggedId = e.dataTransfer.getData('objectId');
+    const sidebarObjectData = e.dataTransfer.getData('sidebarObjectData');
+
+    // Se é um elemento da sidebar sendo arrastado
+    if (sidebarObjectData && props.AddObject) {
+      try {
+        const sidebarObject = JSON.parse(sidebarObjectData);
+        const insertIndex = props.index + 1; // Inserir abaixo
+
+        const newObject = {
+          ...sidebarObject,
+          id: undefined
+        };
+
+        props.AddObject(newObject, insertIndex);
+
+      } catch (error) {
+        console.error('Erro ao processar objeto da sidebar:', error);
+      }
+    }
+    // Se é um objeto existente sendo movido
+    else if (draggedId) {
+      const draggedObject = props.objectsUsed.find(obj => obj.id === draggedId);
+      if (draggedObject && props.MoveObject) {
+        const newIndex = props.index + 1; // Mover para abaixo
+        props.MoveObject(draggedObject, newIndex);
+      }
+    }
+
+    setShowDropZones(false);
+    setActiveDropZone(null);
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      {/* Indicador de drop superior */}
-      {dragOverPosition === 'top' && (
-        <div 
-          style={{ 
-            height: '3px', 
-            background: '#007acc', 
-            marginBottom: '4px',
-            borderRadius: '2px',
-            opacity: 0.8
-          }} 
-        />
-      )}
-      
-      <div
-        draggable
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        style={{ 
-          position: 'relative', 
-          marginBottom: '1rem', 
-          background: isDragging ? '#f0f0f0' : '#f8f8f8', 
-          borderRadius: 8, 
-          padding: 16,
-          cursor: 'move',
-          opacity: isDragging ? 0.5 : 1,
-          transition: 'all 0.2s ease',
-          border: dragOverPosition ? '2px dashed #007acc' : '2px solid transparent'
-        }}
-      >
-        <button
-          onClick={handleRemove}
-          style={{ 
-            position: 'absolute', 
-            top: 8, 
-            right: 8, 
-            background: '#e53e3e', 
-            color: '#fff', 
-            border: 'none', 
-            borderRadius: 4, 
-            padding: '4px 8px', 
-            cursor: 'pointer',
-            zIndex: 10
-          }}
+    <div
+      style={{ position: 'relative' }}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+    >
+      {/* DragSuperior - só aparece quando showDropZones é true */}
+      {showDropZones && !isDragging && (
+        <DropZoneTop
+          onDragOver={handleTopZoneDragOver}
+          onDrop={handleTopZoneDrop}
+          activeDropZone={activeDropZone}
         >
-          Remover
-        </button>
+          <DropZoneContent>
+            <span>⬆️</span>
+            <span>Soltar aqui (acima)</span>
+            <span>⬆️</span>
+          </DropZoneContent>
+        </DropZoneTop>
+      )}
+
+      {/* BaseObject Children */}
+      <BaseObjectContainer
+        $isDragging={isDragging}
+        $showDropZones={showDropZones}
+      >
+        {props.mode === 'edit' &&
+
+          <ActionButtonsContainer>
+            {/* Ícone de mover/arrastar */}
+            <DragIcon
+              draggable
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onMouseEnter={handleDragIconMouseEnter}
+              onMouseLeave={handleDragIconMouseLeave}
+              onMouseDown={handleDragIconMouseDown}
+              onMouseUp={handleDragIconMouseUp}
+              title="Arrastar para mover"
+            >
+              <span>⋮⋮</span>
+            </DragIcon>
+
+            {/* Botão de remover */}
+            <RemoveButton
+              onClick={handleRemove}
+              onMouseEnter={handleRemoveButtonMouseEnter}
+              onMouseLeave={handleRemoveButtonMouseLeave}
+              title="Remover elemento"
+            >
+              🗑️
+            </RemoveButton>
+          </ActionButtonsContainer>
+        }
+
+
         {props.children}
-      </div>
-      
-      {/* Indicador de drop inferior */}
-      {dragOverPosition === 'bottom' && (
-        <div 
-          style={{ 
-            height: '3px', 
-            background: '#007acc', 
-            marginTop: '-12px',
-            marginBottom: '12px',
-            borderRadius: '2px',
-            opacity: 0.8
-          }} 
-        />
+      </BaseObjectContainer>
+
+      {/* DragInferior - só aparece quando showDropZones é true */}
+      {showDropZones && !isDragging && (
+        <DropZoneBottom
+          onDragOver={handleBottomZoneDragOver}
+          onDrop={handleBottomZoneDrop}
+          activeDropZone={activeDropZone}
+        >
+          <DropZoneContent>
+            <span>⬇️</span>
+            <span>Soltar aqui (abaixo)</span>
+            <span>⬇️</span>
+          </DropZoneContent>
+        </DropZoneBottom>
       )}
     </div>
   );

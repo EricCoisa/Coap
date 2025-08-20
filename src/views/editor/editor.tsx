@@ -3,7 +3,7 @@ import Sidebar from '../../components/sidebar/sidebar';
 import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps } from '../../types';
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
-import { MoveObject } from '../../store/application/actions/applicationAction';
+import { MoveObject, AddObject } from '../../store/application/actions/applicationAction';
 import { 
   EditorContainer, 
   EditorContent, 
@@ -17,7 +17,7 @@ const connector = connectUtil(
   (_state: RootStateBase) => ({
     objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? []
   }),
-  { MoveObject }
+  { MoveObject, AddObject }
 );
 
 export interface EditorProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
@@ -33,7 +33,9 @@ function Editor(props : EditorProps) {
   function handleCanvasDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     const draggedId = e.dataTransfer.getData('objectId');
-    if (draggedId) {
+    const sidebarObjectData = e.dataTransfer.getData('sidebarObjectData');
+    
+    if (draggedId || sidebarObjectData) {
       setShowDropZone(true);
     }
   }
@@ -48,8 +50,24 @@ function Editor(props : EditorProps) {
   function handleCanvasDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     const draggedId = e.dataTransfer.getData('objectId');
+    const sidebarObjectData = e.dataTransfer.getData('sidebarObjectData');
     
-    if (draggedId && props.MoveObject) {
+    // Se é um elemento da sidebar
+    if (sidebarObjectData && props.AddObject) {
+      try {
+        const sidebarObject = JSON.parse(sidebarObjectData);
+        const newObject = {
+          ...sidebarObject,
+          id: undefined // O reducer irá gerar um novo ID
+        };
+        // Adicionar no final quando solto no canvas vazio
+        props.AddObject(newObject, props.objectsUsed.length);
+      } catch (error) {
+        console.error('Erro ao processar objeto da sidebar:', error);
+      }
+    }
+    // Se é um objeto existente sendo movido para o final
+    else if (draggedId && props.MoveObject) {
       const draggedObject = props.objectsUsed.find(obj => obj.id === draggedId);
       if (draggedObject) {
         // Move para o final da lista
