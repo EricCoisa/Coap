@@ -31,7 +31,7 @@ function Preview( props : PreviewProps) {
   return (
     <PreviewContainer className={props.className} style={props.style}>
       <PreviewContent>
-        <PreviewTitle>'Visualização do Conteúdo'</PreviewTitle>
+        <PreviewTitle>Visualização do Conteúdo</PreviewTitle>
         <PreviewArea>
           {props.objectsUsed.length === 0 ? (
             <EmptyState>

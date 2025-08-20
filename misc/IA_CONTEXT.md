@@ -73,185 +73,458 @@ src/
 
 ## Sistema de Objetos Educacionais
 
-### Padrão Base de Objeto
+### Arquitetura Atual dos Objetos Genéricos
 
-Todos os objetos educacionais seguem a interface base:
+O sistema de objetos do Coap é baseado em um padrão simplificado que separa **templates/paleta** de **instâncias utilizadas**:
 
 ```typescript
-// src/types/objects/index.ts
-export type ObjectMode = "editor" | "preview";
+// src/types/objects/index.tsx - Estrutura atual
+export type ObjectType = 'title' | 'text' | 'image';
+export type ObjectMode = 'edit' | 'view';
 
-export interface BaseObjectProps {
+export interface Object<T = Record<string, unknown>> {
   id: string;
+  type: ObjectType;
+  label: string;
+  icon?: string;
+  data: T;
+}
+
+// Interface base para componentes de objeto
+export interface IBaseObjectProps {
+  object: Object;
+  index: number;
   mode: ObjectMode;
-  data: Record<string, any>;
-  onUpdate?: (id: string, data: Record<string, any>) => void;
-  onDelete?: (id: string) => void;
-  className?: string;
-  style?: React.CSSProperties;
-}
-
-export interface ObjectConfig {
-  type: string;
-  name: string;
-  icon: string;
-  defaultData: Record<string, any>;
-  quillConfig?: QuillConfig;
 }
 ```
 
-### Estrutura de Componente de Objeto
+### Sistema Dual de Armazenamento
 
-Cada objeto segue o padrão modular:
-
-```
-objectName/
-├── objectName.tsx          # Componente principal
-├── objectName.styles.ts    # Styled components
-├── objectName.config.ts    # Configurações do objeto
-└── index.ts               # Export principal
-```
-
-#### Exemplo - TextObject
-
+#### 1. **ObjectsList** - Templates da Paleta (Estado Global)
 ```typescript
-// src/components/objects/textObject/textObject.tsx
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import ReactQuill from 'react-quill';
-import styled from 'wrapper-styled-components';
-
-import { BaseObjectProps } from '../../../types/objects';
-import { TextObjectContainer, TextObjectContent } from './textObject.styles';
-import { textObjectConfig } from './textObject.config';
-
-export interface TextObjectData {
-  content: string;
-  placeholder?: string;
-}
-
-export interface TextObjectProps extends BaseObjectProps {
-  data: TextObjectData;
-}
-
-function TextObject({ id, mode, data, onUpdate, className, style }: TextObjectProps) {
-  const { t } = useTranslation();
-
-  const handleContentChange = (content: string) => {
-    if (onUpdate) {
-      onUpdate(id, { ...data, content });
-    }
-  };
-
-  if (mode === 'preview') {
-    return (
-      <TextObjectContainer className={className} style={style}>
-        <TextObjectContent dangerouslySetInnerHTML={{ __html: data.content }} />
-      </TextObjectContainer>
-    );
+// src/types/objects/index.tsx
+export const InitialObjects = [
+  {
+    id: "0",
+    type: 'text' as ObjectType,
+    label: 'Texto',
+    icon: '📝',
+    data: {
+      content: 'Este é um texto de exemplo.',
+      fontSize: '16px',
+      color: '#000000'
+    } as TextData
   }
+] as AnyObject[];
+```
 
+**Armazenamento**: `ApplicationState.ObjectsList` (inicializado com `InitialObjects`)
+**Propósito**: Define os tipos de objetos disponíveis na sidebar para arrastar
+**Características**: 
+- São templates, não instâncias
+- Têm IDs fixos (não únicos para uso)
+- Definem dados padrão para novos objetos
+
+#### 2. **ObjectsUsed** - Instâncias no Canvas (Estado Global)
+```typescript
+// src/types/application/index.ts
+export interface ApplicationState {
+  currentLanguage: string;
+  isLowPerformance: boolean;
+  ObjectsList?: AnyObject[];  // Templates da paleta
+  ObjectsUsed?: Object[];     // Instâncias no canvas
+}
+```
+
+**Armazenamento**: `ApplicationState.ObjectsUsed`
+**Propósito**: Objetos realmente colocados no canvas pelo usuário
+**Características**:
+- Cada item tem ID único (GUID gerado automaticamente)
+- Dados independentes e editáveis
+- Posição/ordem determinada pelo índice no array
+
+### Fluxo de Manipulação dos Objetos
+
+#### 1. **Adição de Objeto (Sidebar → Canvas)**
+```typescript
+// src/components/sidebar/sidebar.tsx
+function handleAddObject(object: Object) {
+  if (props.AddObject) props.AddObject(object);
+}
+
+// src/store/application/actions/applicationAction.ts
+export function AddObject(object: Object): AppThunk {
+  return async function dispatchAddObject(dispatch) {
+    dispatch({
+      payload: object,
+      type: OBJECTSUSED_ADD
+    });
+  };
+}
+
+// src/store/application/reducers/applicationReducer.ts
+case OBJECTSUSED_ADD: {
+  // Gera GUID único para a nova instância
+  function generateGuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+  const newObject = {
+    ...action.payload,  // Copia dados do template
+    id: generateGuid()  // Substitui ID por GUID único
+  };
+  return {
+    ...state,
+    ObjectsUsed: state.ObjectsUsed ? [...state.ObjectsUsed, newObject] : [newObject]
+  };
+}
+```
+
+**Processo**:
+1. Usuário clica no template da sidebar
+2. Template é copiado e recebe novo GUID
+3. Nova instância é adicionada ao `ObjectsUsed`
+4. Canvas re-renderiza com novo objeto
+
+#### 2. **Edição de Objeto (Inline no Canvas)**
+```typescript
+// src/components/objects/text/text.tsx
+function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+  props.EditObject(props.object.id, { 
+    ...props.object.data, 
+    content: e.target.value 
+  });
+}
+
+// src/store/application/actions/applicationAction.ts
+export function EditObject(id: string, data: Record<string, unknown>): AppThunk {
+  return async function dispatchEditObject(dispatch) {
+    dispatch({
+      payload: { id, data },
+      type: OBJECTSUSED_EDIT
+    });
+  };
+}
+
+// Reducer atualiza apenas o objeto específico
+case OBJECTSUSED_EDIT: {
+  const { id, data } = action.payload;
+  return {
+    ...state,
+    ObjectsUsed: state.ObjectsUsed.map((obj: Object) =>
+      obj.id === id ? { ...obj, data: data } : obj
+    )
+  };
+}
+```
+
+**Processo**:
+1. Usuário edita conteúdo diretamente no canvas
+2. Componente detecta mudança e chama `EditObject`
+3. Redux encontra objeto pelo ID e atualiza apenas seus dados
+4. Componente re-renderiza com novos dados
+
+#### 3. **Remoção de Objeto**
+```typescript
+// src/components/objects/BaseObject.tsx
+function handleRemove() {
+  if (props.RemoveObject && props.object) {
+    props.RemoveObject(props.object);
+  }
+}
+
+// Reducer remove objeto por ID
+case OBJECTSUSED_REMOVE: {
+  const removeId = String(action.payload.id);
+  return {
+    ...state,
+    ObjectsUsed: state.ObjectsUsed ? 
+      state.ObjectsUsed.filter((obj: Object) => String(obj.id) !== removeId) : []
+  };
+}
+```
+
+#### 4. **Reordenação via Drag & Drop**
+```typescript
+// src/components/objects/BaseObject.tsx
+function handleDragStart(e: React.DragEvent<HTMLDivElement>) {
+  e.dataTransfer.setData('objectId', props.object.id.toString());
+  e.dataTransfer.setData('objectIndex', props.index.toString());
+}
+
+function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+  const draggedId = e.dataTransfer.getData('objectId');
+  const draggedIndex = Number(e.dataTransfer.getData('objectIndex'));
+  if (props.MoveObject && draggedId && typeof draggedIndex === 'number') {
+    props.MoveObject(props.object, draggedIndex);
+  }
+}
+
+// Reducer reordena array ObjectsUsed
+case OBJECTSUSED_MOVE: {
+  const { object, to } = action.payload;
+  const filtered = state.ObjectsUsed.filter((obj: Object) => obj.id !== object.id);
+  const newList = [...filtered.slice(0, to), object, ...filtered.slice(to)];
+  return {
+    ...state,
+    ObjectsUsed: newList
+  };
+}
+```
+
+### Arquitetura de Componentes
+
+#### **BaseObject** - Container Universal
+```typescript
+// src/components/objects/BaseObject.tsx
+export interface IBaseObjectProps {
+  object: Object;     // Dados completos do objeto
+  index: number;      // Posição no array ObjectsUsed
+  mode: ObjectMode;   // 'edit' ou 'view'
+}
+```
+
+**Responsabilidades**:
+- ✅ **Container visual** com background e padding
+- ✅ **Drag & Drop** - permite reordenar objetos
+- ✅ **Botão de remoção** - integrado ao Redux
+- ✅ **Conectado ao Redux** - acesso às actions MoveObject/RemoveObject
+- ✅ **Wrapper para children** - renderiza componente específico dentro
+
+**Estrutura**:
+```jsx
+<BaseObject object={textObject} index={0} mode="edit">
+  {/* Componente específico (TextObject) renderizado como children */}
+</BaseObject>
+```
+
+#### **Componentes Específicos** (TextObject, ImageObject, etc.)
+```typescript
+// src/components/objects/text/text.tsx
+export interface TextData {
+  content: string;
+  fontSize: string;
+  color: string;
+}
+
+function TextObject(props: TextProps) {
+  const data = props.object.data as unknown as TextData;
+  
   return (
-    <TextObjectContainer className={className} style={style}>
-      <ReactQuill
-        theme="snow"
-        value={data.content}
-        onChange={handleContentChange}
-        placeholder={data.placeholder || t('objects.text.placeholder')}
-        modules={textObjectConfig.quillConfig.modules}
-        formats={textObjectConfig.quillConfig.formats}
-      />
-    </TextObjectContainer>
+    <BaseObject object={props.object} index={props.index} mode={props.mode}>
+      {props.mode === 'edit' ? (
+        <textarea
+          value={data.content}
+          onChange={handleContentChange}
+          // ... configurações de edição
+        />
+      ) : (
+        <div>
+          {data.content}
+        </div>
+      )}
+    </BaseObject>
   );
 }
-
-export default TextObject;
 ```
 
+**Responsabilidades**:
+- ✅ **Renderização específica** do tipo de conteúdo
+- ✅ **Modo dual** - interface de edição vs visualização 
+- ✅ **Tipagem de dados** - cast de `object.data` para tipo específico
+- ✅ **Integração Redux** - conectado a `EditObject` para mudanças
+- ✅ **Sempre wrapped** por BaseObject
+
+### Sistema de Renderização
+
+#### **ObjectElements** - Mapeamento Tipo → Componente
 ```typescript
-// src/components/objects/textObject/textObject.styles.ts
-import styled from 'wrapper-styled-components';
+// src/types/objects/index.tsx
+export const ObjectElements = [{
+  type: 'text' as ObjectType,
+  element: Text,  // Referência ao componente TextObject
+}] as ObjectElement[];
 
-export const TextObjectContainer = styled.div`
-  ${styled.themeLayer};
-  width: 100%;
-  background: ${({ theme }) => theme.colors.objectBackground};
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    box-shadow: ${({ theme }) => theme.boxShadow};
-  }
-  
-  .ql-editor {
-    min-height: 120px;
-    font-family: ${({ theme }) => theme.fonts.body};
-    color: ${({ theme }) => theme.colors.text};
-  }
-  
-  .ql-toolbar {
-    border-top: 1px solid ${({ theme }) => theme.colors.border};
-    border-left: 1px solid ${({ theme }) => theme.colors.border};
-    border-right: 1px solid ${({ theme }) => theme.colors.border};
-  }
-  
-  .ql-container {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-    border-left: 1px solid ${({ theme }) => theme.colors.border};
-    border-right: 1px solid ${({ theme }) => theme.colors.border};
-  }
-`;
-
-export const TextObjectContent = styled.div`
-  padding: 1rem;
-  line-height: 1.6;
-  color: ${({ theme }) => theme.colors.text};
-  font-family: ${({ theme }) => theme.fonts.body};
-  
-  h1, h2, h3, h4, h5, h6 {
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-  }
-  
-  p {
-    margin-bottom: 1em;
-  }
-  
-  ul, ol {
-    margin-left: 2em;
-  }
-`;
+export interface ObjectElement {
+  type: ObjectType;
+  element: React.FC<IBaseObjectProps>;
+}
 ```
 
+#### **Renderização Dinâmica no Canvas**
 ```typescript
-// src/components/objects/textObject/textObject.config.ts
-import { ObjectConfig } from '../../../types/objects';
+// src/views/editor/editor.tsx
+{props.objectsUsed.map((o, i) => {
+  const Component = ObjectElements.find(element => element.type === o.type)?.element;
+  return Component ? 
+    React.createElement(Component, { 
+      object: o, 
+      index: i, 
+      mode: "edit" 
+    }) : null;
+})}
+```
 
-export const textObjectConfig: ObjectConfig = {
-  type: 'text',
-  name: 'Texto',
-  icon: 'mdi:text-box',
-  defaultData: {
-    content: '',
-    placeholder: 'Digite seu texto aqui...'
-  },
-  quillConfig: {
-    modules: {
-      toolbar: [
-        [{ 'header': [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'align': [] }],
-        ['link'],
-        ['clean']
-      ]
-    },
-    formats: [
-      'header', 'bold', 'italic', 'underline', 'strike',
-      'list', 'bullet', 'align', 'link'
-    ]
+**Fluxo**:
+1. **ObjectsUsed** contém lista de objetos no canvas
+2. Para cada objeto, busca componente correspondente em **ObjectElements**
+3. Usa `React.createElement` para instanciar componente dinamicamente
+4. Passa props: `object`, `index`, `mode`
+
+### Padrões de Dados
+
+#### **Tipagem Flexível**
+```typescript
+// Genérico para qualquer tipo de dado
+export interface Object<T = Record<string, unknown>> {
+  id: string;
+  type: ObjectType;
+  label: string;
+  icon?: string;
+  data: T;  // Dados específicos do tipo
+}
+
+// Tipos específicos
+export type AnyObject = Object<TextData> | Object<Record<string, unknown>>;
+
+// Dados específicos do texto
+export interface TextData {
+  content: string;
+  fontSize: string;
+  color: string;
+}
+```
+
+#### **Conversão de Tipos nos Componentes**
+```typescript
+// No componente específico, converte data genérica para tipo específico
+function TextObject(props: TextProps) {
+  const data = props.object.data as unknown as TextData;
+  // Agora 'data' tem tipagem forte para TextData
+}
+```
+
+### Performance e Otimizações
+
+#### **Monitoramento de Performance**
+```typescript
+// src/utils/applicationUtil.ts
+let lastFrame = performance.now();
+let frameCount = 0;
+let fps: number | undefined = undefined;
+
+function measureFPS() {
+  const now = performance.now();
+  frameCount++;
+  if (now - lastFrame >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastFrame = now;
+
+    if(fps < 15){
+      Store.dispatch({ type: LOWPERFORMANCE_SET, payload: true });
+    }
   }
-};
+  window.requestAnimationFrame(measureFPS);
+}
+```
+
+**Sistema**:
+- ✅ Monitora FPS automaticamente
+- ✅ Detecta dispositivos móveis
+- ✅ Respeita `prefers-reduced-motion`
+- ✅ Atualiza estado global para otimizações
+
+#### **Estado de Performance**
+```typescript
+// src/types/application/index.ts
+export interface ApplicationState {
+  currentLanguage: string;
+  isLowPerformance: boolean;  // Usado para otimizações
+  ObjectsList?: AnyObject[];
+  ObjectsUsed?: Object[];
+}
+```
+
+### Limitações e Oportunidades Atuais
+
+#### **Implementação Simplificada**
+O sistema atual usa uma abordagem mais direta comparada ao design original:
+
+**❌ Não Implementado (do design original)**:
+- ✖️ React Quill para rich text editing
+- ✖️ Sistema de configurações por objeto (.config.ts)
+- ✖️ Wrapper styled-components com themeLayer
+- ✖️ Sistema de temas dinâmicos
+- ✖️ Múltiplos modos (editor/preview)
+- ✖️ Sistema de posicionamento livre (canvas com coordenadas)
+- ✖️ Sistema de seleção múltipla
+- ✖️ Undo/Redo
+
+**✅ Implementado (versão atual)**:
+- ✅ Templates da paleta (InitialObjects)
+- ✅ Instâncias independentes (ObjectsUsed)
+- ✅ CRUD completo via Redux
+- ✅ Componentes dinâmicos por tipo
+- ✅ Drag & Drop básico para reordenação
+- ✅ Modo dual edit/view por componente
+- ✅ Sistema de IDs únicos (GUID)
+- ✅ Edição inline nos componentes
+
+#### **Estrutura de Armazenamento Real**
+```typescript
+// Estado atual no Redux
+ApplicationState {
+  currentLanguage: 'pt',
+  isLowPerformance: false,
+  ObjectsList: [           // Templates/Paleta
+    {
+      id: "0",            // ID fixo (template)
+      type: 'text',
+      label: 'Texto',
+      icon: '📝',
+      data: {
+        content: 'Este é um texto de exemplo.',
+        fontSize: '16px',
+        color: '#000000'
+      }
+    }
+  ],
+  ObjectsUsed: [          // Instâncias no Canvas
+    {
+      id: "abc-123-def",   // GUID único
+      type: 'text',
+      label: 'Texto',
+      icon: '📝',
+      data: {
+        content: 'Meu texto editado',
+        fontSize: '16px',
+        color: '#000000'
+      }
+    }
+  ]
+}
+```
+
+#### **Fluxo Completo Real**
+```
+1. InitialObjects → ApplicationState.ObjectsList (templates)
+   ↓
+2. Usuário clica template na Sidebar
+   ↓
+3. AddObject copia template + gera GUID → ObjectsUsed
+   ↓
+4. Editor renderiza ObjectsUsed com React.createElement
+   ↓
+5. Componente específico (TextObject) wrapped por BaseObject
+   ↓
+6. Edições → EditObject → atualiza ObjectsUsed[index].data
+   ↓
+7. Remoção → RemoveObject → remove de ObjectsUsed
+   ↓
+8. Drag & Drop → MoveObject → reordena ObjectsUsed
 ```
 
 ## Sistema de Temas (Baseado no Portfolio)
@@ -299,53 +572,6 @@ export const Component = styled.div`
 export const Component = styled.div`
   background: #ffffff;
 `;
-```
-
-## Gerenciamento de Estado (Redux)
-
-### Objects Module State
-
-```typescript
-// src/types/objects/index.ts
-export interface ObjectInstance {
-  id: string;
-  type: string;
-  data: Record<string, any>;
-  position: { x: number; y: number };
-  size: { width: number; height: number };
-  zIndex: number;
-  isSelected: boolean;
-  isLocked: boolean;
-}
-
-export interface ObjectsState {
-  objects: ObjectInstance[];
-  selectedObjects: string[];
-  clipboard: ObjectInstance[];
-  draggedObject: string | null;
-}
-```
-
-### Editor Module State
-
-```typescript
-// src/types/editor/index.ts
-export type EditorMode = 'editor' | 'preview';
-export type EditorTool = 'select' | 'text' | 'image' | 'video' | 'title';
-
-export interface EditorState {
-  mode: EditorMode;
-  currentTool: EditorTool;
-  canvasSize: { width: number; height: number };
-  zoom: number;
-  gridVisible: boolean;
-  snapToGrid: boolean;
-  history: {
-    past: ObjectInstance[][];
-    present: ObjectInstance[];
-    future: ObjectInstance[][];
-  };
-}
 ```
 
 ### Redux Utilities (Baseado no Portfolio)
@@ -671,82 +897,149 @@ export function useDragDrop() {
 ```
 
 
-## Padrão de Desenvolvimento Coap
+## Padrão de Desenvolvimento Coap (Atualizado)
 
-### Convenções Gerais
+### Convenções Atuais
 
 1. **Componentes Funcionais**: Sempre usar function declarations.
 2. **Redux Integrado**: Componentes principais conectados ao estado global via Redux Toolkit, usando o padrão `connectUtil`.
 3. **Tipagem Rigorosa**: Todos os componentes e props devem ser fortemente tipados com TypeScript, usando `PropsFromRedux` para componentes conectados.
 4. **Estrutura Modular**: Cada componente em seu próprio diretório, com arquivos `.tsx` para lógica/JSX e `.styles.ts` para estilos.
-5. **Theme System Opt-in**: Usar `${styled.themeLayer}` para componentes que devem receber tema dinâmico.
-6. **Responsividade**: Mobile-first, breakpoints definidos em `styles/breakpoints.ts` e utilitários em `styles/responsive-utils.ts`.
-7. **Estado Global**: Estados como `ObjetosList` são definidos no `applicationReducer` e consumidos via Redux nos componentes.
-8. **Exportação**: Componentes conectados são exportados como `ConnectedComponent`.
+5. **Estado Global Centralizado**: Estados como `ObjectsList` e `ObjectsUsed` são definidos no `applicationReducer` e consumidos via Redux nos componentes.
+6. **Exportação**: Componentes conectados são exportados como `ConnectedComponent`.
+7. **Sistema de Objetos**: Templates na paleta vs instâncias no canvas.
 
-### Estrutura Recomendada
+### Estrutura Real de Componente de Objeto
 
 ```
-component/
-├── Component.tsx          # Lógica e JSX principal, conectado ao Redux se necessário
-├── Component.styles.ts    # Styled components
-├── Component.types.ts     # Types específicas (quando extensas)
+components/objects/
+├── BaseObject.tsx              # Container universal com drag/drop/remove
+├── text/
+│   ├── text.tsx               # Componente específico de texto
+│   └── text.styles.ts         # Estilos (se necessário)
+└── [futuro] image/
+    ├── image.tsx
+    └── image.styles.ts
 ```
 
-### Padrão de Props
+### Padrão de Props Real
 
 ```typescript
-// Props base para todos os componentes
-export interface BaseComponentProps {
-  className?: string;
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
+// Props para componentes de objeto específicos
+export interface IBaseObjectProps {
+  object: Object;      // Dados completos do objeto
+  index: number;       // Posição no array ObjectsUsed  
+  mode: ObjectMode;    // 'edit' ou 'view'
 }
 
 // Para componentes conectados:
 import { connectUtil, type PropsFromRedux } from 'src/utils/reduxUtil';
 const connector = connectUtil(
-  (state: RootStateBase) => ({ /* ... */ }),
-  { /* actions */ }
+  (state: RootStateBase) => ({ 
+    objectsUsed: state.ApplicationReducer.ObjectsUsed ?? []
+  }),
+  { EditObject }
 );
-export interface ComponentProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
-  // props específicas
+export interface TextProps extends IBaseObjectProps, PropsFromRedux<typeof connector> {
+  // props específicas do texto
 }
 ```
 
-### Exemplo de Componente Conectado
+### Exemplo Real de Componente Conectado
 
 ```typescript
+// src/components/objects/text/text.tsx
 const connector = connectUtil(
-  (state: RootStateBase) => ({
-    objetosList: state.ApplicationReducer.ObjetosList ?? []
+  (_state : RootStateBase) => ({
+     objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? []
   }),
-  {}
+  { EditObject}
 );
 
-function Sidebar({ className, style, objetosList }: SidebarProps) {
-  // ...
+function TextObject(props: TextProps) {
+  const data = props.object.data as unknown as TextData;
+
+  function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    props.EditObject(props.object.id, { 
+      ...props.object.data, 
+      content: e.target.value 
+    });
+  }
+
+  return (
+    <BaseObject object={props.object} index={props.index} mode={props.mode}>
+      {props.mode === 'edit' ? (
+        <textarea value={data.content} onChange={handleContentChange} />
+      ) : (
+        <div>{data.content}</div>
+      )}
+    </BaseObject>
+  );
 }
 
-const ConnectedSidebar = connector(Sidebar);
-export default ConnectedSidebar;
+const ConnectedTextObject = connector(TextObject);
+export default ConnectedTextObject;
 ```
 
-### Estado Global
+### Estado Global Real
 
 ```typescript
 // src/types/application/index.ts
-import type { Objeto } from '../../types/objects';
 export interface ApplicationState {
   currentLanguage: string;
   isLowPerformance: boolean;
-  ObjetosList?: Objeto[];
+  ObjectsList?: AnyObject[];  // Templates da paleta (InitialObjects)
+  ObjectsUsed?: Object[];     // Instâncias efetivamente no canvas
 }
 ```
 
-### Interações Futuras
+### Actions Redux Implementadas
 
-Todas as novas features, componentes e integrações devem seguir este padrão: modularidade, tipagem forte, conexão ao Redux quando necessário e uso do sistema de temas opt-in. Componentes que manipulam ou exibem dados globais devem consumir o estado via Redux e PropsFromRedux.
+```typescript
+// src/store/application/actions/applicationAction.ts
+OBJECTSUSED_ADD    // Adicionar objeto ao canvas (com GUID único)
+OBJECTSUSED_EDIT   // Editar dados de objeto específico
+OBJECTSUSED_REMOVE // Remover objeto do canvas
+OBJECTSUSED_MOVE   // Reordenar objetos no canvas
+```
+
+### Padrão de Renderização Dinâmica
+
+```typescript
+// src/views/editor/editor.tsx
+{props.objectsUsed.map((o, i) => {
+  const Component = ObjectElements.find(element => element.type === o.type)?.element;
+  return Component ? React.createElement(Component, { 
+    object: o, 
+    index: i, 
+    mode: "edit" 
+  }) : null;
+})}
+```
+
+### Diferenças da Arquitetura Original
+
+**✅ Mantido do Design Original**:
+- Redux pattern com connectUtil
+- Tipagem forte com TypeScript
+- Estrutura modular de componentes
+- Padrão de exportação ConnectedComponent
+
+**🔄 Simplificado na Implementação**:
+- **Objetos**: Interface mais simples (Object vs BaseObjectProps complexa)
+- **Modos**: 'edit'/'view' vs 'editor'/'preview'
+- **Dados**: Record<string, unknown> vs tipagem específica rígida
+- **Posicionamento**: Lista sequencial vs coordenadas livres
+- **Estilo**: CSS inline básico vs styled-components avançado
+
+**📝 Para Implementações Futuras**:
+- Sistema de temas dinâmico
+- React Quill para rich text
+- Configurações por objeto (.config.ts)
+- Sistema de posicionamento livre
+- Undo/Redo com histórico
+- Múltipla seleção
+- Export/Import JSON
 
 ## Sistema de Temas
 
@@ -894,36 +1187,133 @@ npm run analyze         # Análise do bundle
 3. Conectar com Redux se necessário
 4. Adicionar rota (se aplicável)
 
-### Regras de Ouro para o Coap
+### Regras de Ouro para o Coap (Atualizadas)
 
-- **SEMPRE** usar o padrão ObjectMode ("editor" | "preview")
-- **SEMPRE** implementar interface BaseObjectProps nos objetos
-- **SEMPRE** separar lógica de editor e preview
-- **SEMPRE** usar `${styled.themeLayer}` para componentes temáticos
-- **SEMPRE** tipar props e estados com TypeScript
-- **SEMPRE** implementar responsividade mobile-first
-- **SEMPRE** usar configurações Quill específicas por tipo de objeto
-- **SEMPRE** implementar callbacks onUpdate e onDelete nos objetos
-- **SEMPRE** considerar performance (lazy loading, memoização)
+- **SEMPRE** usar o padrão ObjectMode ("edit" | "view")
+- **SEMPRE** implementar interface IBaseObjectProps nos objetos específicos
+- **SEMPRE** usar BaseObject como wrapper universal
+- **SEMPRE** separar lógica de edição e visualização no mesmo componente
+- **SEMPRE** tipar dados específicos (ex: TextData) via casting de object.data
+- **SEMPRE** conectar ao Redux via connectUtil para ações de CRUD
+- **SEMPRE** usar GUID único para instâncias (gerado automaticamente no AddObject)
+- **SEMPRE** distinguir templates (ObjectsList) de instâncias (ObjectsUsed)
+- **SEMPRE** implementar callbacks de edição via EditObject action
+- **SEMPRE** registrar novos tipos em ObjectElements para renderização dinâmica
+- **SEMPRE** considerar performance (monitoramento FPS automático)
 - **SEMPRE** seguir convenções de naming e estrutura de arquivos
-- **SEMPRE** implementar acessibilidade (ARIA, keyboard navigation)
+- **SEMPRE** implementar drag & drop via BaseObject (já integrado)
+- **SEMPRE** usar React.createElement para renderização dinâmica no canvas
 
-## Diferenças Arquiteturais do Portfolio
+## Comandos de Desenvolvimento
 
-### Adaptações para o Coap
+```bash
+# Desenvolvimento
+npm run dev              # Servidor de desenvolvimento Vite
+npm run build           # Build para produção
+npm run lint            # Linting ESLint
+npm run preview         # Preview da build
 
-1. **Sistema Dual**: Editor/Preview em vez de views estáticas
-2. **Objetos Dinâmicos**: Componentes que mudam comportamento por modo
-3. **Rich Text**: Integração profunda com React Quill
-4. **Drag & Drop**: Sistema de arrastar e soltar objetos
-5. **Estado Complexo**: Gerenciamento de objetos, histórico e editor
-6. **Upload System**: Gerenciamento de assets (imagens, vídeos)
-7. **Export/Import**: Serialização para JSON dos materiais criados
+# Dependências já instaladas
+npm i react react-dom    # Core React
+npm i @reduxjs/toolkit react-redux  # Estado global
+npm i styled-components  # Estilização
+npm i typescript @types/react @types/react-dom  # TypeScript
+npm i i18next react-i18next i18next-browser-languagedetector  # Internacionalização
+```
 
-### Mantidas do Portfolio
+## Diretrizes para Expansão
 
-1. **Sistema de Temas**: Wrapper styled-components com opt-in
-2. **Redux Pattern**: Utilities e padrões de conexão
-3. **Responsive System**: Breakpoints e media queries
-4. **Component Architecture**: Estrutura modular e tipagem forte
-5. **Performance Patterns**: Lazy loading e otimizações
+### Adicionando Novo Tipo de Objeto
+
+1. **Criar estrutura**:
+```
+src/components/objects/newType/
+├── newType.tsx         # Componente principal
+└── newType.styles.ts   # Estilos (opcional)
+```
+
+2. **Implementar componente**:
+```typescript
+export interface NewTypeData {
+  // definir estrutura de dados específica
+}
+
+function NewTypeObject(props: NewTypeProps) {
+  const data = props.object.data as unknown as NewTypeData;
+  
+  return (
+    <BaseObject object={props.object} index={props.index} mode={props.mode}>
+      {props.mode === 'edit' ? (
+        // interface de edição
+      ) : (
+        // interface de visualização
+      )}
+    </BaseObject>
+  );
+}
+```
+
+3. **Registrar no sistema**:
+```typescript
+// src/types/objects/index.tsx
+export type ObjectType = 'title' | 'text' | 'image' | 'newType';
+
+// Adicionar ao InitialObjects
+export const InitialObjects = [
+  // ... objetos existentes
+  {
+    id: "new-template",
+    type: 'newType' as ObjectType,
+    label: 'Novo Tipo',
+    icon: '🆕',
+    data: {
+      // dados padrão
+    } as NewTypeData
+  }
+];
+
+// Adicionar ao ObjectElements
+export const ObjectElements = [
+  // ... elementos existentes
+  {
+    type: 'newType' as ObjectType,
+    element: NewTypeObject,
+  }
+];
+```
+
+4. **Importar e exportar**:
+```typescript
+// src/types/objects/index.tsx
+import NewTypeObject from "../../components/objects/newType/newType.tsx";
+import type { NewTypeData } from "../../components/objects/newType/newType.tsx";
+```
+
+### Adicionando Nova View
+
+1. Criar pasta em `src/views/newView/`
+2. Implementar componente principal conectado ao Redux
+3. Consumir `ObjectsUsed` para renderizar objetos
+4. Usar mesmo padrão de renderização dinâmica do Editor
+
+### Expandindo Funcionalidades
+
+**Para Rich Text (React Quill)**:
+- Instalar: `npm install react-quill`
+- Substituir textarea por ReactQuill nos componentes
+- Adicionar configurações específicas por tipo
+
+**Para Temas Dinâmicos**:
+- Implementar wrapper styled-components
+- Adicionar sistema de ThemeProvider
+- Usar `${styled.themeLayer}` nos estilos
+
+**Para Export/Import**:
+- Serializar `ObjectsUsed` para JSON
+- Implementar actions EXPORT_CONTENT / IMPORT_CONTENT
+- Adicionar validação de estrutura na importação
+
+**Para Undo/Redo**:
+- Adicionar campo `history` ao ApplicationState
+- Implementar actions UNDO / REDO
+- Capturar snapshots antes de mudanças em ObjectsUsed

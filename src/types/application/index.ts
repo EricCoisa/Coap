@@ -7,12 +7,12 @@ export const OBJECTSUSED_REMOVE = 'OBJECTSUSED_REMOVE';
 export const OBJECTSUSED_MOVE = 'OBJECTSUSED_MOVE';
 export const OBJECTSUSED_EDIT = 'OBJECTSUSED_EDIT';
 
-import type { Object } from '../objects';
+import type { AnyObject, Object } from '../objects';
 
 export interface ApplicationState {
     currentLanguage: string;
     isLowPerformance: boolean;
-    ObjectsList?: Object[];
+    ObjectsList?: AnyObject[];
     ObjectsUsed?: Object[];
 }
 

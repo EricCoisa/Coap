@@ -53,20 +53,40 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
         case OBJECTSUSED_MOVE: {
             if (!state.ObjectsUsed) return state;
             const { object, to } = action.payload;
-            const filtered = state.ObjectsUsed.filter((obj: Object) => obj.id !== object.id);
-            const newList = [...filtered.slice(0, to), object, ...filtered.slice(to)];
+            
+            // Encontrar o índice atual do objeto
+            const currentIndex = state.ObjectsUsed.findIndex((obj: Object) => obj.id === object.id);
+            if (currentIndex === -1) return state; // Objeto não encontrado
+            
+            // Criar uma nova lista sem o objeto atual
+            const newList = [...state.ObjectsUsed];
+            newList.splice(currentIndex, 1); // Remove o objeto da posição atual
+            
+            // Ajustar o índice de destino se necessário
+            let targetIndex = to;
+            if (currentIndex < to) {
+                targetIndex = to - 1; // Se movendo para frente, ajustar o índice
+            }
+            
+            // Garantir que o índice esteja dentro dos limites
+            targetIndex = Math.max(0, Math.min(targetIndex, newList.length));
+            
+            // Inserir o objeto na nova posição
+            newList.splice(targetIndex, 0, object);
+            
             return {
                 ...state,
                 ObjectsUsed: newList
             };
         }
         case OBJECTSUSED_EDIT: {
+            console.log("Editando objeto:", action.payload);
             if (!state.ObjectsUsed) return state;
             const { id, data } = action.payload;
             return {
                 ...state,
                 ObjectsUsed: state.ObjectsUsed.map((obj: Object) =>
-                    obj.id === id ? { ...obj, ...data } : obj
+                    obj.id === id ? { ...obj, data:data } : obj
                 )
             };
         }

@@ -1,10 +1,12 @@
-import { useState } from 'react';
 import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 import BaseObject, { type IBaseObjectProps } from '../BaseObject';
 import { EditObject } from '../../../store/application/actions/applicationAction';
+import type { RootStateBase } from '../../../store/rootReducer';
 
 const connector = connectUtil(
-  () => ({}),
+  (_state : RootStateBase) => ({
+     objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? []
+  }),
   { EditObject}
 );
 
@@ -18,16 +20,10 @@ export interface TextProps extends IBaseObjectProps, PropsFromRedux<typeof conne
 }
 
 function TextObject(props: TextProps) {
-  const [data, setData] = useState({
-    content: 'Este é um texto de exemplo.',
-    fontSize: '16px',
-    color: '#000000'
-  } as TextData);
+  const data = props.object.data as unknown as TextData; // Garantir que data é do deste elemento
 
   function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    console.log("Texto alterado:", e.target.value);
-    setData({ ...data, content: e.target.value });
-    props.EditObject(props.object.id, { ...data, content: e.target.value });
+    props.EditObject(props.object.id, { ...props.object.data, content: e.target.value });
   }
 
   return (
