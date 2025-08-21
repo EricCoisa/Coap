@@ -11,7 +11,8 @@ import type { ObjectMode } from '../../../types/objects';
 import type { BaseComponentProps } from '../../../types';
 
 // Tipos para configuração da toolbar do Quill
-type ToolbarOption = 
+
+export type ToolbarOption =
   | 'bold' | 'italic' | 'underline' | 'strike'
   | 'blockquote' | 'code-block'
   | 'link' | 'image' | 'video'
@@ -53,7 +54,7 @@ export interface RichTextProps extends BaseComponentProps{
     value:string | Delta;
     setValue: (value: RichTextResponse) => void;
     mode : ObjectMode;
-    toolbar?: ToolbarConfig; // Configuração da toolbar do Quill
+    toolbar?: ToolbarConfig | boolean; // Configuração da toolbar do Quill
     formats?: string[]; // Formatos permitidos do Quill
     defaultStyle?: DefaultStyle; // Estilo inicial do texto
 }
@@ -165,9 +166,22 @@ function RichText(props: RichTextProps) {
   // Configurar módulos e formatos baseado nas props usando useMemo
   const quillModules = useMemo(() => {
     if (toolbar !== undefined) {
-      return toolbar === false ? { toolbar: false } : {
-        toolbar: Array.isArray(toolbar) ? toolbar : toolbar
-      };
+      if (toolbar === false) {
+        return { toolbar: false };
+      }
+      
+      if (Array.isArray(toolbar)) {
+        return { toolbar: toolbar };
+      }
+      
+      if (toolbar === true) {
+        // Se toolbar é true, usar toolbar padrão baseada no tamanho da tela
+        const isMobile = window.innerWidth <= 768;
+        return isMobile ? mobileModules : modules;
+      }
+      
+      // Se toolbar é uma string ou outro tipo, usar como configuração
+      return { toolbar: toolbar };
     }
     
     // Usar toolbar apropriada baseada no tamanho da tela
@@ -327,7 +341,7 @@ function RichText(props: RichTextProps) {
   }
 
   return (
-    <RichTextContainer>
+    <RichTextContainer className={toolbar === false ? 'no-toolbar' : ''}>
       <div ref={containerRef} />
     </RichTextContainer>
   );

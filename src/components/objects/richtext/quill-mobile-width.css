@@ -1,4 +1,18 @@
 /* CSS Mobile específico para Quill.js - Otimização de Largura */
+
+/* Ocultar toolbar quando desabilitada */
+.ql-toolbar[style*="display: none"],
+.ql-toolbar.ql-toolbar-disabled,
+.no-toolbar .ql-toolbar {
+  display: none !important;
+}
+
+/* Ajustar container quando não há toolbar */
+.no-toolbar .ql-container {
+  border-top: 1px solid #ccc !important;
+  border-radius: 6px !important;
+}
+
 @media (max-width: 768px) {
   /* Container principal do Quill - aproveitar toda largura */
   .ql-container {

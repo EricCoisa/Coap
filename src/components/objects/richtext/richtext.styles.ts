@@ -60,6 +60,12 @@ export const RichTextContainer = styled.div`
     flex-shrink: 0;
     box-sizing: border-box;
     
+    /* Ocultar toolbar quando desabilitada */
+    &.ql-toolbar-disabled,
+    &[style*="display: none"] {
+      display: none !important;
+    }
+    
     ${mediaQueries.mobile} {
       padding: 8px;
       
@@ -131,6 +137,14 @@ export const RichTextContainer = styled.div`
     }
   }
   
+  /* Garantir que container sem toolbar tenha border apropriada */
+  &.no-toolbar {
+    .ql-container {
+      border-top: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  }
+
   &.view-mode {
     padding: 0;
     

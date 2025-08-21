@@ -1,10 +1,12 @@
 import type { IBaseObjectProps } from "../../components/objects/BaseObject.tsx";
 import Text from "../../components/objects/text/text.tsx";
 import Title from "../../components/objects/title/title.tsx";
+import Image from "../../components/objects/image/image.tsx";
 import type { TextData } from "../../components/objects/text/text.tsx";
 import type { TitleData } from "../../components/objects/title/title.tsx";
+import type { ImageData } from "../../components/objects/image/image.tsx";
 
-export type ObjectType = 'title' | 'text';
+export type ObjectType = 'title' | 'text' | 'image';
 export type ObjectMode = 'edit' | 'view';
 
 export interface Object<T = Record<string, unknown>> {
@@ -22,17 +24,6 @@ export type AnyObject = Object<TextData> | Object<Record<string, unknown>>;
 export const InitialObjects = [
   {
     id: "0",
-    type: 'text' as ObjectType,
-    label: 'Texto',
-    icon: '📝',
-    data: {
-      content: 'Este é um texto de exemplo.',
-      fontSize: '16px',
-      color: '#000000'
-    } as TextData
-  },
-  {
-    id: "1",
     type: 'title' as ObjectType,
     label: 'Título',
     icon: '📋',
@@ -41,7 +32,30 @@ export const InitialObjects = [
       fontSize: '24px',
       color: '#333333'
     } as TitleData
+  },
+  {
+    id: "1",
+    type: 'text' as ObjectType,
+    label: 'Texto',
+    icon: '📝',
+    data: {
+      content: 'Este é um texto de exemplo.',
+      fontSize: '16px',
+      color: '#000000'
+    } as TextData
+  },{
+    id: "2",
+    type: 'image' as ObjectType,
+    label: 'Imagem',
+    icon: '🖼️',
+    data: {
+      imageUrl: "/vite.svg",
+      imageAlt: "Exemplo de Imagem",
+      source: "Fonte:Local",
+      title: "Título da Imagem"
+    } as ImageData
   }
+  
 ] as AnyObject[];
 
 
@@ -52,6 +66,9 @@ export const ObjectElements = [
   }, {
     type: 'text' as ObjectType,
     element: Text,
+  }, {
+    type: 'image' as ObjectType,
+    element: Image,
   }
 ] as ObjectElement[];
 
