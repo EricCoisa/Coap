@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { mediaQueries } from '../../../styles/breakpoints';
 
-export const RichTextContainer = styled.div`
+export const RichTextContainer = styled.div<{ toolbarState: boolean }>`
   padding: 4px; /* Drasticamente reduzido */
   height: 100%;
   width: 100%;
@@ -27,6 +27,10 @@ export const RichTextContainer = styled.div`
     font-family: inherit;
     height: auto;
 
+    ${props => !props.toolbarState && css`
+      border: none;
+    `}
+
     ${mediaQueries.mobile} {
       width: 100%;
       border-radius: 0 0 6px 6px;
@@ -40,7 +44,7 @@ export const RichTextContainer = styled.div`
     font-size: 14px;
     line-height: 1.5;
     overflow-y: auto;
-    resize: vertical;
+    resize: none !important; /* Remove a capacidade de redimensionar a caixa de texto */
     box-sizing: border-box;
     padding: 12px 15px;
     
@@ -140,8 +144,7 @@ export const RichTextContainer = styled.div`
   /* Garantir que container sem toolbar tenha border apropriada */
   &.no-toolbar {
     .ql-container {
-      border-top: 1px solid #ccc;
-      border-radius: 4px;
+      border: none !important; /* Remove a borda quando toolbarState for falso */
     }
   }
 
@@ -191,6 +194,10 @@ export const RichTextContainer = styled.div`
     .ql-cursor {
       display: none !important;
     }
+  }
+  
+  .hidden {
+    display: none !important;
   }
 `;
 

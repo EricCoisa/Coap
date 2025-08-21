@@ -9,6 +9,8 @@ import './quill-mobile-width.css';
 import { RichTextContainer } from './richtext.styles';
 import type { ObjectMode } from '../../../types/objects';
 import type { BaseComponentProps } from '../../../types';
+import type { RootStateBase } from '../../../store/rootReducer';
+import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 
 // Tipos para configuração da toolbar do Quill
 
@@ -50,7 +52,7 @@ export interface RichTextResponse{
     delta: Delta
 }
 
-export interface RichTextProps extends BaseComponentProps{
+export interface RichTextProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
     value:string | Delta;
     setValue: (value: RichTextResponse) => void;
     mode : ObjectMode;
@@ -96,50 +98,23 @@ const defaultFormats = [
   'blockquote', 'code-block'
 ];
 
-// Função para verificar se value é Delta
-function isDelta(val: string | Delta): val is Delta {
-  return typeof val === 'object' && val !== null && 'ops' in val;
+
+const connector = connectUtil(
+  (_state : RootStateBase) => ({
+     toolbarState: _state.ApplicationReducer.toolbar ?? []
+  }),
+  { }
+);
+
+export interface TextData  {
+  content: Delta | string, // Pode ser Delta ou string dependendo do modo
+  fontSize: string,
+  color: string
 }
 
-// Função para obter HTML do value (seja string ou Delta)
-function getHtmlFromValue(val: string | Delta): string {
-  if (!val) return '';
-  
-  if (typeof val === 'string') {
-    return val;
-  }
-  
-  // Se for Delta, criar uma instância temporária do Quill para converter
-  if (isDelta(val)) {
-    const tempDiv = document.createElement('div');
-    const tempQuill = new Quill(tempDiv);
-    tempQuill.setContents(val);
-    const html = tempQuill.root.innerHTML;
-    tempDiv.remove();
-    return html;
-  }
-  
-  return '';
-}
-
-// Função para definir conteúdo no Quill baseado no tipo do value
-function setQuillContent(quill: Quill, val: string | Delta) {
-  if (!val) {
-    quill.setContents([]);
-    return;
-  }
-
-  if (typeof val === 'string') {
-    // Se for string HTML
-    quill.clipboard.dangerouslyPasteHTML(val);
-  } else if (isDelta(val)) {
-    // Se for Delta
-    quill.setContents(val);
-  }
-}
 
 function RichText(props: RichTextProps) {
-  const { value, setValue, mode, toolbar, formats } = props;
+  const { value, setValue, mode, toolbar, formats, toolbarState } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const quillInstance = useRef<Quill | null>(null);
   const isUpdating = useRef(false);
@@ -165,21 +140,25 @@ function RichText(props: RichTextProps) {
 
   // Configurar módulos e formatos baseado nas props usando useMemo
   const quillModules = useMemo(() => {
+    if (toolbarState === false) {
+      return { toolbar: false };
+    }
+
     if (toolbar !== undefined) {
       if (toolbar === false) {
         return { toolbar: false };
       }
-      
+
       if (Array.isArray(toolbar)) {
         return { toolbar: toolbar };
       }
-      
+
       if (toolbar === true) {
         // Se toolbar é true, usar toolbar padrão baseada no tamanho da tela
         const isMobile = window.innerWidth <= 768;
         return isMobile ? mobileModules : modules;
       }
-      
+
       // Se toolbar é uma string ou outro tipo, usar como configuração
       return { toolbar: toolbar };
     }
@@ -187,7 +166,7 @@ function RichText(props: RichTextProps) {
     // Usar toolbar apropriada baseada no tamanho da tela
     const isMobile = window.innerWidth <= 768;
     return isMobile ? mobileModules : modules;
-  }, [toolbar]);
+  }, [toolbar, toolbarState]);
   
   const quillFormats = useMemo(() => formats || defaultFormats, [formats]);
 
@@ -292,6 +271,20 @@ function RichText(props: RichTextProps) {
 
   }, [mode, isQuillInitialized, quillModules, quillFormats, props.defaultStyle]);
 
+  // Atualizar a toolbar dinamicamente quando toolbarState mudar
+  useEffect(() => {
+    if (quillInstance.current && isQuillInitialized) {
+      const toolbarModule = quillInstance.current.getModule('toolbar');
+      console.log('Atualizando toolbar - toolbarState:', toolbarState, 'toolbarModule:', toolbarModule);
+      if (toolbarModule && typeof toolbarModule === 'object' && 'container' in toolbarModule) {
+        console.log('Mostrando/Escondendo toolbar baseado em toolbarState:', toolbarState);
+        const toolbarContainer = (toolbarModule as { container: HTMLElement }).container;
+        toolbarContainer.classList.toggle('hidden', toolbarState === false);
+        console.log('Toolbar atualizada - estado:', toolbarContainer);
+      }
+    }
+  }, [toolbarState, quillModules, isQuillInitialized]);
+
   // Cleanup no unmount do componente
   useEffect(() => {
     return () => {
@@ -347,4 +340,48 @@ function RichText(props: RichTextProps) {
   );
 }
 
-export default RichText;
+const ConnectedRichText = connector(RichText);
+export default ConnectedRichText;
+
+
+// Função para verificar se value é Delta
+function isDelta(val: string | Delta): val is Delta {
+  return typeof val === 'object' && val !== null && 'ops' in val;
+}
+
+// Função para obter HTML do value (seja string ou Delta)
+function getHtmlFromValue(val: string | Delta): string {
+  if (!val) return '';
+  
+  if (typeof val === 'string') {
+    return val;
+  }
+  
+  // Se for Delta, criar uma instância temporária do Quill para converter
+  if (isDelta(val)) {
+    const tempDiv = document.createElement('div');
+    const tempQuill = new Quill(tempDiv);
+    tempQuill.setContents(val);
+    const html = tempQuill.root.innerHTML;
+    tempDiv.remove();
+    return html;
+  }
+  
+  return '';
+}
+
+// Função para definir conteúdo no Quill baseado no tipo do value
+function setQuillContent(quill: Quill, val: string | Delta) {
+  if (!val) {
+    quill.setContents([]);
+    return;
+  }
+
+  if (typeof val === 'string') {
+    // Se for string HTML
+    quill.clipboard.dangerouslyPasteHTML(val);
+  } else if (isDelta(val)) {
+    // Se for Delta
+    quill.setContents(val);
+  }
+}
