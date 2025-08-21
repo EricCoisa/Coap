@@ -7,13 +7,24 @@ export const OBJECTSUSED_REMOVE = 'OBJECTSUSED_REMOVE';
 export const OBJECTSUSED_MOVE = 'OBJECTSUSED_MOVE';
 export const OBJECTSUSED_EDIT = 'OBJECTSUSED_EDIT';
 
+export const TOOLBAR_SET = 'TOOLBAR_SET';
+
 import type { AnyObject } from '../objects';
+
+import type { ViewMode } from '../index';
+export const VIEWMODE_SET = 'VIEWMODE_SET';
 
 export interface ApplicationState {
     currentLanguage: string;
     isLowPerformance: boolean;
     ObjectsList?: AnyObject[];
     ObjectsUsed?: AnyObject[];
+    viewMode?: ViewMode;
+    toolbar: boolean;
+}
+export interface ApplicationViewModeAction {
+    type: typeof VIEWMODE_SET;
+    payload: ViewMode;
 }
 
 export interface ApplicationObjectsListAction {
@@ -60,4 +71,9 @@ export interface ApplicationLanguageAction {
     payload: string;
 }
 
-export type ApplicationTypes = ApplicationLanguageAction | ApplicationLowPerformanceAction | ApplicationObjectsListAction | ApplicationObjectsUsedAddAction | ApplicationObjectsUsedRemoveAction | ApplicationObjectsUsedMoveAction | ApplicationObjectsUsedEditAction;
+export interface ApplicationToolbarAction {
+    type: typeof TOOLBAR_SET;
+    payload: boolean;
+}
+
+export type ApplicationTypes = ApplicationLanguageAction | ApplicationLowPerformanceAction | ApplicationObjectsListAction | ApplicationObjectsUsedAddAction | ApplicationObjectsUsedRemoveAction | ApplicationObjectsUsedMoveAction | ApplicationObjectsUsedEditAction | ApplicationViewModeAction | ApplicationToolbarAction;

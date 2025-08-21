@@ -3,7 +3,7 @@ import Quill, { Delta } from 'quill';
 import 'quill/dist/quill.snow.css';
 // Importar módulos específicos do Quill para garantir funcionalidade
 import 'quill/dist/quill.core.css';
-import { RichTextContainer, RichTextViewer } from './richtext.styles';
+import { RichTextContainer } from './richtext.styles';
 import type { ObjectMode } from '../../../types/objects';
 import type { BaseComponentProps } from '../../../types';
 
@@ -24,7 +24,22 @@ type ToolbarOption =
   | { 'direction': 'rtl' | false }
   | { 'script': 'sub' | 'super' };
 
-type ToolbarConfig = ToolbarOption[][] | ToolbarOption[] | string | false;
+export type ToolbarConfig = ToolbarOption[][] | ToolbarOption[] | string | false;
+
+// Tipo para definir estilos iniciais (formatação de texto)
+export type DefaultStyle = {
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strike?: boolean;
+  font?: string;
+  size?: string;
+  color?: string;
+  background?: string;
+  align?: string;
+  header?: number | false;
+  [key: string]: unknown; // Para permitir outras propriedades do Quill
+};
 
 export interface RichTextResponse{
     values: string;
@@ -37,6 +52,7 @@ export interface RichTextProps extends BaseComponentProps{
     mode : ObjectMode;
     toolbar?: ToolbarConfig; // Configuração da toolbar do Quill
     formats?: string[]; // Formatos permitidos do Quill
+    defaultStyle?: DefaultStyle; // Estilo inicial do texto
 }
 
 // Configuração dos módulos do Quill
@@ -120,9 +136,11 @@ function RichText(props: RichTextProps) {
   // Configurar módulos e formatos baseado nas props usando useMemo
   const quillModules = useMemo(() => ({
     toolbar: toolbar !== undefined ? (
-      toolbar === false ? false : {
-        container: toolbar
-      }
+      toolbar === false ? false : (
+        Array.isArray(toolbar) ? toolbar : {
+          container: toolbar
+        }
+      )
     ) : modules.toolbar
   }), [toolbar]);
   
@@ -138,7 +156,7 @@ function RichText(props: RichTextProps) {
     const container = containerRef.current;
     console.log('useEffect Quill - container:', container, 'mode:', mode, 'isQuillInitialized:', isQuillInitialized, 'quillInstance.current:', quillInstance.current);
     
-    if (container && mode === 'edit' && !isQuillInitialized && !quillInstance.current) {
+    if (container && !isQuillInitialized && !quillInstance.current) {
       console.log('Inicializando Quill - primeira vez');
       
       // Verificar se já existe uma instância Quill neste container
@@ -151,10 +169,11 @@ function RichText(props: RichTextProps) {
       // Criar nova instância do Quill
       console.log("instantiate")
       quillInstance.current = new Quill(container, {
-        theme: 'snow',
-        modules: quillModules,
+        theme: mode === 'view' ? 'bubble' : 'snow',
+        modules: mode === 'view' ? { toolbar: false } : quillModules,
         formats: quillFormats,
-        placeholder: 'Digite seu texto rico aqui...'
+        placeholder: mode === 'edit' ? 'Digite seu texto rico aqui...' : '',
+        readOnly: mode === 'view'
       });
 
       console.log('Quill criado:', quillInstance.current);
@@ -167,46 +186,66 @@ function RichText(props: RichTextProps) {
         setQuillContent(quillInstance.current, currentValue.current);
       }
 
-      // Listener para mudanças
-      console.log('Registrando listener text-change');
-      quillInstance.current.on('text-change', () => {
-        console.log('Event text-change disparado!');
-        if (quillInstance.current && !isUpdating.current) {
-          const html = quillInstance.current.root.innerHTML;
-          console.log('Texto alterado:', html);
-          console.log('setValueRef.current:', setValueRef.current);
-          setValueRef.current({
-            values: html,
-            delta: quillInstance.current.getContents()
-          });
-        } else {
-          console.log('Listener ignorado - isUpdating:', isUpdating.current, 'quillInstance:', !!quillInstance.current);
-        }
-      });
+      // Aplicar estilo inicial se definido - apenas no modo edit
+      if (props.defaultStyle && mode === 'edit') {
+        setTimeout(() => {
+          if (quillInstance.current && props.defaultStyle) {
+            const length = quillInstance.current.getLength();
+            console.log('Aplicando defaultStyle:', props.defaultStyle, 'no conteúdo de length:', length);
+            
+            if (length > 1) { // > 1 porque Quill sempre tem um \n no final
+              quillInstance.current.formatText(0, length - 1, props.defaultStyle as Record<string, unknown>);
+            }
+            
+            // Também definir formato padrão para novo texto
+            Object.entries(props.defaultStyle).forEach(([key, value]) => {
+              if (value !== undefined && quillInstance.current) {
+                quillInstance.current.format(key, value);
+              }
+            });
+          }
+        }, 0);
+      }
+
+      // Listener para mudanças - apenas no modo edit
+      if (mode === 'edit') {
+        console.log('Registrando listener text-change');
+        quillInstance.current.on('text-change', () => {
+          console.log('Event text-change disparado!');
+          if (quillInstance.current && !isUpdating.current) {
+            const html = quillInstance.current.root.innerHTML;
+            console.log('Texto alterado:', html);
+            console.log('setValueRef.current:', setValueRef.current);
+            setValueRef.current({
+              values: html,
+              delta: quillInstance.current.getContents()
+            });
+          } else {
+            console.log('Listener ignorado - isUpdating:', isUpdating.current, 'quillInstance:', !!quillInstance.current);
+          }
+        });
+      }
     }
 
-    // Cleanup apenas quando o modo mudar para não-edit
-    if (mode !== 'edit' && quillInstance.current) {
-      console.log('Limpando Quill - mudança de modo');
-      quillInstance.current.off('text-change');
-      if (container) {
-        container.innerHTML = ''; // Limpar DOM
+    // Atualizar readOnly quando o modo mudar
+    if (quillInstance.current && isQuillInitialized) {
+      const shouldBeReadOnly = mode === 'view';
+      if (quillInstance.current.isEnabled() === shouldBeReadOnly) {
+        quillInstance.current.enable(!shouldBeReadOnly);
       }
-      quillInstance.current = null;
-      setIsQuillInitialized(false);
     }
 
     // Cleanup para Strict Mode
     return () => {
       // No Strict Mode, este cleanup roda após primeira execução
       // MAS só limpamos se realmente vamos desmontar
-      if (mode === 'edit') {
+      if (mode === 'edit' || mode === 'view') {
         console.log('Strict Mode cleanup - mantendo instância');
-        return; // Não limpar no Strict Mode se ainda estamos em modo edit
+        return; // Não limpar no Strict Mode se ainda estamos em uso
       }
     };
 
-  }, [mode, isQuillInitialized, quillModules, quillFormats]);
+  }, [mode, isQuillInitialized, quillModules, quillFormats, props.defaultStyle]);
 
   // Cleanup no unmount do componente
   useEffect(() => {
@@ -222,7 +261,7 @@ function RichText(props: RichTextProps) {
 
   // Atualizar conteúdo quando value mudar externamente
   useEffect(() => {
-    if (quillInstance.current && isQuillInitialized && mode === 'edit') {
+    if (quillInstance.current && isQuillInitialized) {
       // Verificar se o conteúdo atual é diferente do novo value
       const currentHtml = quillInstance.current.root.innerHTML;
       const newHtml = getHtmlFromValue(value);
@@ -230,26 +269,30 @@ function RichText(props: RichTextProps) {
       if (newHtml !== currentHtml) {
         isUpdating.current = true;
         setQuillContent(quillInstance.current, value);
+        
+        // Reaplicar defaultStyle após definir o conteúdo - apenas no modo edit
+        if (props.defaultStyle && mode === 'edit') {
+          setTimeout(() => {
+            if (quillInstance.current && props.defaultStyle) {
+              const length = quillInstance.current.getLength();
+              if (length > 1) { // > 1 porque Quill sempre tem um \n no final
+                quillInstance.current.formatText(0, length - 1, props.defaultStyle as Record<string, unknown>);
+              }
+            }
+          }, 0);
+        }
+        
         isUpdating.current = false;
       }
     }
-  }, [value, mode, isQuillInitialized]);
-
-  // Função para renderizar apenas o conteúdo HTML no modo view
-  function renderViewContent() {
-    const htmlContent = getHtmlFromValue(value) || '<p>Clique para editar...</p>';
-    
-    return (
-      <RichTextViewer 
-        dangerouslySetInnerHTML={{ 
-          __html: htmlContent
-        }} 
-      />
-    );
-  }
+  }, [value, mode, isQuillInitialized, props.defaultStyle]);
 
   if (mode === 'view') {
-    return renderViewContent();
+    return (
+      <RichTextContainer className="view-mode">
+        <div ref={containerRef} />
+      </RichTextContainer>
+    );
   }
 
   return (

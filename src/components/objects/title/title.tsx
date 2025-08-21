@@ -2,7 +2,7 @@ import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 import BaseObject, { type IBaseObjectProps } from '../BaseObject';
 import { EditObject } from '../../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../../store/rootReducer';
-import RichText, { type RichTextResponse } from '../richtext/richtext';
+import RichText, { type DefaultStyle, type RichTextResponse, type ToolbarConfig } from '../richtext/richtext';
 import { TextContainer } from './title.styles';
 import type { Delta } from 'quill';
 
@@ -22,6 +22,21 @@ export interface TitleData  {
 export interface TitleProps extends IBaseObjectProps, PropsFromRedux<typeof connector> {
 }
 
+const titleToolBar: ToolbarConfig = [
+  [{ color: [] }, { align: [] }]
+];
+
+const defaultStyle: DefaultStyle = {
+  bold: true,
+  color: '#ff0000',
+  size: 'large',
+  align: 'center'
+};
+
+const titleFormats = [
+  'bold', 'italic', 'underline', 'strike', 'color', 'size', 'align'
+];
+
 function TitleObject(props: TitleProps) {
   const data = props.object.data as unknown as TitleData; // Garantir que data é do deste elemento
   function handleContentChange(value: RichTextResponse) {
@@ -35,6 +50,9 @@ function TitleObject(props: TitleProps) {
           value={data.content}
           setValue={handleContentChange}
           mode={props.mode}
+          toolbar={titleToolBar}
+          formats={titleFormats}
+          defaultStyle={defaultStyle}
         />
       </TextContainer>
     </BaseObject>

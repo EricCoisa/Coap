@@ -66,3 +66,9 @@ export const ToolsContainer = styled.div`
     }
   }
 `;
+
+
+export const ToolsOptions = styled.div`
+
+`;
+

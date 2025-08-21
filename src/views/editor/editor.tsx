@@ -83,7 +83,7 @@ function Editor(props : EditorProps) {
         <Sidebar />
 
         <Canvas>
-          <CanvasTitle>Canvas do Editor</CanvasTitle>
+          <CanvasTitle>Editor</CanvasTitle>
           <CanvasArea
             onDragOver={handleCanvasDragOver}
             onDragLeave={handleCanvasDragLeave}

@@ -19,7 +19,8 @@ import {
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
-    objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? []
+    objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? [],
+    toolbar: _state.ApplicationReducer.toolbar
   }),
   { RemoveObject, MoveObject, AddObject }
 );
@@ -253,7 +254,7 @@ function BaseObject(props: BaseObjectProps) {
         $isDragging={isDragging}
         $showDropZones={showDropZones}
       >
-        {props.mode === 'edit' &&
+        {props.mode === 'edit' && props.toolbar &&
 
           <ActionButtonsContainer>
             {/* Ícone de mover/arrastar */}

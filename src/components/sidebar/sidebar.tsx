@@ -1,18 +1,20 @@
 
 import React from 'react';
-import { AddObject } from '../../store/application/actions/applicationAction';
+import { AddObject, SetToolbar } from '../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps } from '../../types';
 import type { AnyObject } from '../../types/objects';
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
-import { Sidebar, SidebarTitle, ToolsContainer } from './sidebar.styles';
+import { Sidebar, SidebarTitle, ToolsContainer, ToolsOptions } from './sidebar.styles';
 import { globalDragState } from '../../utils/dragState';
+import Switch from '../switch/Switch';
 
 const connector = connectUtil(
   (state: RootStateBase) => ({
-    objectsList: state.ApplicationReducer.ObjectsList ?? []
+    objectsList: state.ApplicationReducer.ObjectsList ?? [],
+    toolbar: state.ApplicationReducer.toolbar
   }),
-  { AddObject}
+  { AddObject, SetToolbar}
 );
 
 export interface SidebarProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
@@ -55,9 +57,20 @@ function SidebarComponent(props : SidebarProps) {
     e.currentTarget.style.cursor = 'grab';
   }
 
+
+  function handleToolbar() {
+    props.SetToolbar(!props.toolbar);
+  }
+
   return (
     <Sidebar className={props.className} style={props.style}>
       <SidebarTitle>Objetos</SidebarTitle>
+      <ToolsContainer>
+         <ToolsOptions style={{ alignItems: 'center', gap: '10px', display: 'flex' }}>
+          <label style={{ margin: 0, whiteSpace: 'nowrap', fontWeight: 500 }}>Barra de Ferramentas</label>
+          <Switch checked={props.toolbar} onChange={handleToolbar} />
+         </ToolsOptions>
+      </ToolsContainer>
       <ToolsContainer>
         {props.objectsList.length > 0 && (
           props.objectsList.map(obj => (

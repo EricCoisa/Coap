@@ -1,8 +1,8 @@
-
 import type { AppThunk } from "../../../utils/reduxUtil";
 import i18n from '../../../i18n';
-import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE } from "../../../types/application";
+import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, TOOLBAR_SET, VIEWMODE_SET } from "../../../types/application";
 import type { AnyObject } from "../../../types/objects";
+import type { ViewMode } from '../../../types';
 
 
 export function SetCurrentLanguage(language: string): AppThunk {
@@ -50,6 +50,25 @@ export function MoveObject(object: AnyObject, to: number): AppThunk {
         dispatch({
             payload: { object, to },
             type: OBJECTSUSED_MOVE
+        });
+    };
+}
+
+export function SetViewMode(mode: ViewMode): AppThunk {
+    return async function dispatchSetViewMode(dispatch) {
+        dispatch({
+            payload: mode,
+            type: VIEWMODE_SET
+        });
+    };
+}
+
+export function SetToolbar(toolbar: boolean): AppThunk {
+    console.log("toolbar", toolbar)
+    return async function dispatchSetToolbar(dispatch) {
+        dispatch({
+            payload: toolbar,
+            type: TOOLBAR_SET
         });
     };
 }

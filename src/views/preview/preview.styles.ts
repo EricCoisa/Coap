@@ -78,7 +78,7 @@ export const EmptyState = styled.div`
 
     ${mediaQueries.mobile} {
       font-size: 0.875rem;
-      max-width: 300px;
+     
     }
   }
 `;

@@ -1,6 +1,6 @@
 import type { IBaseObjectProps } from "../../components/objects/BaseObject.tsx";
 import Text from "../../components/objects/text/text.tsx";
-import RichText from "../../components/objects/richtext/richtext.tsx";
+import Title from "../../components/objects/title/title.tsx";
 import type { TextData } from "../../components/objects/text/text.tsx";
 import type { TitleData } from "../../components/objects/title/title.tsx";
 
@@ -33,7 +33,7 @@ export const InitialObjects = [
   },
   {
     id: "1",
-    type: 'text' as ObjectType,
+    type: 'title' as ObjectType,
     label: 'Título',
     icon: '📋',
     data: {
@@ -45,13 +45,15 @@ export const InitialObjects = [
 ] as AnyObject[];
 
 
-export const ObjectElements = [{
-  type: 'text' as ObjectType,
-  element: Text,
-}, {
-  type: 'richtext' as ObjectType,
-  element: RichText,
-}] as ObjectElement[];
+export const ObjectElements = [
+  {
+    type: 'title' as ObjectType,
+    element: Title,
+  }, {
+    type: 'text' as ObjectType,
+    element: Text,
+  }
+] as ObjectElement[];
 
 export interface ObjectElement {
   type: ObjectType;

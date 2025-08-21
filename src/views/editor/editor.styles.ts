@@ -134,7 +134,7 @@ export const CanvasArea = styled.div`
 
   p {
     margin: 0;
-    max-width: 300px;
+ 
   }
 
   ${mediaQueries.mobile} {

@@ -61,12 +61,12 @@ function Header(props : HeaderProps) {
         </Navigation>
 
         <Actions>
-          {props.onSave && (
+          {props.currentMode === 'editor' && props.onSave && (
             <ActionButton onClick={props.onSave}>
               Salvar
             </ActionButton>
           )}
-          {props.onExport && (
+          {props.currentMode === 'preview' && props.onExport && (
             <ActionButton onClick={props.onExport}>
               Exportar
             </ActionButton>
