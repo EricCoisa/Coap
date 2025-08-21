@@ -44,6 +44,18 @@ export const ImageContainer = styled.div`
     flex-direction: column;
     gap: 1rem;
     align-items: center;
+
+    /* Desktop: layout em linha para economizar espaço */
+    @media (min-width: 769px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    ${mediaQueries.mobile} {
+      gap: 0.75rem;
+    }
   }
 
   /* Botão de upload melhorado */
@@ -62,6 +74,16 @@ export const ImageContainer = styled.div`
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 122, 204, 0.2);
     text-decoration: none;
+    white-space: nowrap;
+
+    /* Desktop: botão mais compacto */
+    @media (min-width: 769px) {
+      flex-shrink: 0;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.875rem;
+      align-self: flex-end; /* Alinha com os inputs */
+      margin-bottom: 0.375rem; /* Compensa altura do label */
+    }
 
     &:hover {
       background: linear-gradient(135deg, #0056b3, #004085);
@@ -88,10 +110,22 @@ export const ImageContainer = styled.div`
     width: 100%;
     max-width: 400px;
 
+    /* Desktop: largura flexível para caber em linha */
+    @media (min-width: 769px) {
+      flex: 1;
+      max-width: none;
+      min-width: 200px;
+    }
+
     label {
       font-size: 0.875rem;
       font-weight: 500;
       color: #495057;
+
+      @media (min-width: 769px) {
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
     }
   }
 
