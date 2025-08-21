@@ -4,6 +4,7 @@ import { GlobalStyles } from './styles/GlobalStyles'
 import Header from './components/header/header'
 import Editor from './views/editor/editor'
 import Preview from './views/preview/preview'
+import { SidebarProvider } from './contexts/SidebarContext'
 import type { ViewMode } from './types'
 import { connectUtil, type PropsFromRedux } from './utils/reduxUtil';
 import type { RootStateBase } from './store/rootReducer';
@@ -67,18 +68,20 @@ function App(props: PropsFromRedux<typeof connector>) {
   return (
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyles />
-      <Header
-        currentMode={props.viewMode}
-        onModeChange={handleModeChange}
-        onSave={handleSave}
-        onExport={handleExport}
-        onImport={handleImport}
-      />
-      {props.viewMode === 'editor' ? (
-        <Editor />
-      ) : (
-        <Preview />
-      )}
+      <SidebarProvider>
+        <Header
+          currentMode={props.viewMode}
+          onModeChange={handleModeChange}
+          onSave={handleSave}
+          onExport={handleExport}
+          onImport={handleImport}
+        />
+        {props.viewMode === 'editor' ? (
+          <Editor />
+        ) : (
+          <Preview />
+        )}
+      </SidebarProvider>
     </ThemeProvider>
   )
 }

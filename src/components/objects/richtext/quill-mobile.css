@@ -1,0 +1,58 @@
+/* Estilos globais adicionais para Quill no mobile */
+
+/* Melhorar seleção de texto no mobile */
+@media (max-width: 768px) {
+  .ql-editor {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    
+    /* Melhorar performance no scroll */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Evitar zoom no focus */
+    font-size: 16px !important;
+  }
+  
+  /* Melhorar botões da toolbar no mobile */
+  .ql-toolbar .ql-stroke {
+    stroke-width: 2px;
+  }
+  
+  .ql-toolbar .ql-fill {
+    fill: currentColor;
+  }
+  
+  /* Melhorar dropdowns */
+  .ql-picker-options {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .ql-picker-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* Melhorar tooltips e popups */
+  .ql-tooltip {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  
+  .ql-tooltip input[type=text] {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  .ql-tooltip input[type=text]:focus {
+    border-color: #007acc;
+    box-shadow: 0 0 0 2px rgba(0,122,204,0.2);
+  }
+}

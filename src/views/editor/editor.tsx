@@ -4,6 +4,7 @@ import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps } from '../../types';
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
 import { MoveObject, AddObject } from '../../store/application/actions/applicationAction';
+import { useSidebar } from '../../hooks/useSidebar';
 import { 
   EditorContainer, 
   EditorContent, 
@@ -27,8 +28,38 @@ export interface EditorProps extends BaseComponentProps, PropsFromRedux<typeof c
 
 function Editor(props : EditorProps) {
   const [showDropZone, setShowDropZone] = useState(false);
+  const { isMinimized } = useSidebar();
+  const { AddObject, objectsUsed } = props;
 
-  useEffect(()=>{console.log(props.objectsUsed)},[props.objectsUsed]);
+  useEffect(()=>{console.log(objectsUsed)},[objectsUsed]);
+
+  // Listener para eventos de touch drop
+  useEffect(() => {
+    function handleTouchDrop(e: CustomEvent) {
+      const { sidebarObjectData } = e.detail;
+      if (sidebarObjectData && AddObject) {
+        try {
+          const sidebarObject = JSON.parse(sidebarObjectData);
+          const newObject = {
+            ...sidebarObject,
+            id: undefined // O reducer irá gerar um novo ID
+          };
+          // Adicionar no final quando solto no canvas vazio
+          AddObject(newObject, objectsUsed.length);
+        } catch (error) {
+          console.error('Erro ao processar objeto da sidebar:', error);
+        }
+      }
+    }
+
+    const canvasArea = document.querySelector('.canvas-area');
+    if (canvasArea) {
+      canvasArea.addEventListener('touchDrop', handleTouchDrop as EventListener);
+      return () => {
+        canvasArea.removeEventListener('touchDrop', handleTouchDrop as EventListener);
+      };
+    }
+  }, [AddObject, objectsUsed.length]);
 
   function handleCanvasDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -53,7 +84,7 @@ function Editor(props : EditorProps) {
     const sidebarObjectData = e.dataTransfer.getData('sidebarObjectData');
     
     // Se é um elemento da sidebar
-    if (sidebarObjectData && props.AddObject) {
+    if (sidebarObjectData && AddObject) {
       try {
         const sidebarObject = JSON.parse(sidebarObjectData);
         const newObject = {
@@ -61,39 +92,40 @@ function Editor(props : EditorProps) {
           id: undefined // O reducer irá gerar um novo ID
         };
         // Adicionar no final quando solto no canvas vazio
-        props.AddObject(newObject, props.objectsUsed.length);
+        AddObject(newObject, objectsUsed.length);
       } catch (error) {
         console.error('Erro ao processar objeto da sidebar:', error);
       }
     }
     // Se é um objeto existente sendo movido para o final
     else if (draggedId && props.MoveObject) {
-      const draggedObject = props.objectsUsed.find(obj => obj.id === draggedId);
+      const draggedObject = objectsUsed.find(obj => obj.id === draggedId);
       if (draggedObject) {
         // Move para o final da lista
-        props.MoveObject(draggedObject, props.objectsUsed.length);
+        props.MoveObject(draggedObject, objectsUsed.length);
       }
     }
     
     setShowDropZone(false);
   }
   return (
-    <EditorContainer className={props.className} style={props.style}>
+    <EditorContainer className={props.className} style={props.style} $sidebarExpanded={!isMinimized}>
       <EditorContent>
         <Sidebar />
 
         <Canvas>
           <CanvasTitle>Editor</CanvasTitle>
           <CanvasArea
+            className="canvas-area"
             onDragOver={handleCanvasDragOver}
             onDragLeave={handleCanvasDragLeave}
             onDrop={handleCanvasDrop}
           >
-            {props.objectsUsed.length === 0 ? (
+            {objectsUsed.length === 0 ? (
               <p>Arraste objetos da sidebar para começar a criar seu conteúdo educacional.</p>
             ) : (
               <>
-                {props.objectsUsed.map((o, i) => {
+                {objectsUsed.map((o, i) => {
                   const Component = ObjectElements.find(element => element.type === o.type)?.element;
                   return Component ? React.createElement(Component, { object: o, index: i, mode: "edit", key: o.id }) : null;
                 })}

@@ -20,6 +20,20 @@ export const GlobalStyles = createGlobalStyle`
     overflow-x: hidden;
   }
 
+  /* Mobile: garantir que elementos usem toda largura disponível */
+  @media (max-width: 768px) {
+    html, body {
+      width: 100%;
+      max-width: 100%;
+    }
+    
+    /* Remover padding padrão que pode limitar largura */
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  }
+
   button {
     font-family: inherit;
   }

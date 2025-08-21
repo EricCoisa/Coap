@@ -7,6 +7,12 @@ export const responsiveContainer = css`
   margin: 0 auto;
   padding: 0 1rem;
   
+  @media (max-width: 768px) {
+    padding: 0 0.5rem; /* Menos padding no mobile para aproveitar mais largura */
+    width: 100%;
+    max-width: 100%;
+  }
+  
   @media (min-width: ${breakpoints.tablet}) {
     padding: 0 2rem;
   }
@@ -19,15 +25,17 @@ export const responsiveContainer = css`
 export const editorLayout = css`
   display: grid;
   grid-template-columns: 250px 1fr;
-  gap: 1rem;
+  gap: 0.5rem; /* Reduzido de 1rem */
   
   @media (max-width: 1200px) {
     grid-template-columns: 200px 1fr;
+    gap: 0.25rem; /* Ainda menor em telas médias */
   }
   
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
+    gap: 0.25rem; /* Mínimo no mobile */
   }
 `;
 

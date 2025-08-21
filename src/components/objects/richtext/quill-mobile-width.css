@@ -1,0 +1,123 @@
+/* CSS Mobile específico para Quill.js - Otimização de Largura */
+@media (max-width: 768px) {
+  /* Container principal do Quill - aproveitar toda largura */
+  .ql-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  /* Editor - aproveitar toda largura */
+  .ql-editor {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12px 6px !important; /* Menos padding lateral para mais largura */
+    margin: 0 !important;
+    font-size: 16px !important; /* Evita zoom automático iOS */
+    line-height: 1.5 !important;
+    min-height: 120px !important;
+  }
+
+  /* Toolbar - aproveitar toda largura */
+  .ql-toolbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 6px 4px !important; /* Menos padding para mais espaço */
+    margin: 0 !important;
+    border-radius: 6px 6px 0 0 !important;
+    background: #f8f9fa !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+
+  /* Grupos de ferramentas - compactos */
+  .ql-toolbar .ql-formats {
+    margin-right: 6px !important;
+    display: inline-block !important;
+  }
+
+  .ql-toolbar .ql-formats:last-child {
+    margin-right: 0 !important;
+  }
+
+  /* Botões da toolbar - touch-friendly mas compactos */
+  .ql-toolbar button {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    padding: 3px !important;
+    margin: 1px !important;
+    border-radius: 4px !important;
+    background: white !important;
+    border: 1px solid #ddd !important;
+    font-size: 13px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    touch-action: manipulation !important;
+  }
+
+  /* Estado ativo dos botões */
+  .ql-toolbar button:hover,
+  .ql-toolbar button.ql-active {
+    background: #007acc !important;
+    color: white !important;
+    border-color: #007acc !important;
+  }
+
+  /* Dropdowns compactos */
+  .ql-toolbar .ql-picker {
+    width: auto !important;
+    min-width: 50px !important;
+    display: inline-block !important;
+  }
+
+  .ql-toolbar .ql-picker-label {
+    padding: 4px 6px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    background: white !important;
+    font-size: 13px !important;
+    height: 30px !important;
+    line-height: 22px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Tooltips responsivos */
+  .ql-tooltip {
+    left: 4px !important;
+    right: 4px !important;
+    width: auto !important;
+    max-width: calc(100% - 8px) !important;
+  }
+
+  .ql-tooltip input {
+    font-size: 16px !important;
+    padding: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Estilos específicos para containers pai */
+@media (max-width: 768px) {
+  /* Garantir que containers pai não limitam largura */
+  .ql-editor p,
+  .ql-editor div,
+  .ql-editor span {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Otimizar quebra de linha */
+  .ql-editor {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+}

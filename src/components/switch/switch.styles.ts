@@ -5,6 +5,7 @@ export const SwitchContainer = styled.div`
   align-items: center;
   gap: clamp(8px, 2vw, 10px);
   min-height: 44px;
+  max-width: 44px;
 `;
 
 export const SwitchButton = styled.button<{ checked: boolean }>`
@@ -19,6 +20,7 @@ export const SwitchButton = styled.button<{ checked: boolean }>`
   outline: none;
   padding: 0;
   flex-shrink: 0;
+  min-width: 40px !important;
 
   span {
     position: absolute;

@@ -3,6 +3,9 @@ import Quill, { Delta } from 'quill';
 import 'quill/dist/quill.snow.css';
 // Importar módulos específicos do Quill para garantir funcionalidade
 import 'quill/dist/quill.core.css';
+// Importar estilos mobile personalizados
+import './quill-mobile.css';
+import './quill-mobile-width.css';
 import { RichTextContainer } from './richtext.styles';
 import type { ObjectMode } from '../../../types/objects';
 import type { BaseComponentProps } from '../../../types';
@@ -70,6 +73,18 @@ const modules = {
   }
 };
 
+// Configuração compacta para mobile
+const mobileModules = {
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['clean']
+    ]
+  }
+};
+
 // Formatos permitidos padrão
 const defaultFormats = [
   'header',
@@ -128,21 +143,37 @@ function RichText(props: RichTextProps) {
   const quillInstance = useRef<Quill | null>(null);
   const isUpdating = useRef(false);
   const [isQuillInitialized, setIsQuillInitialized] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const setValueRef = useRef(setValue);
   const currentValue = useRef(value);
 
   console.log('RichText renderizado - mode:', mode, 'value:', value, 'setValue:', !!setValue);
 
+  // Listener para mudanças de tamanho da tela (apenas para detecção inicial)
+  useEffect(() => {
+    function handleResize() {
+      const mobile = window.innerWidth <= 768;
+      if (mobile !== isMobile) {
+        setIsMobile(mobile);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile]);
+
   // Configurar módulos e formatos baseado nas props usando useMemo
-  const quillModules = useMemo(() => ({
-    toolbar: toolbar !== undefined ? (
-      toolbar === false ? false : (
-        Array.isArray(toolbar) ? toolbar : {
-          container: toolbar
-        }
-      )
-    ) : modules.toolbar
-  }), [toolbar]);
+  const quillModules = useMemo(() => {
+    if (toolbar !== undefined) {
+      return toolbar === false ? { toolbar: false } : {
+        toolbar: Array.isArray(toolbar) ? toolbar : toolbar
+      };
+    }
+    
+    // Usar toolbar apropriada baseada no tamanho da tela
+    const isMobile = window.innerWidth <= 768;
+    return isMobile ? mobileModules : modules;
+  }, [toolbar]);
   
   const quillFormats = useMemo(() => formats || defaultFormats, [formats]);
 

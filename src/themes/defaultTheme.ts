@@ -45,6 +45,7 @@ export const defaultTheme = {
   },
   zIndex: {
     header: 1000,
+    sidebar: 1001,
     modal: 1100,
     dropdown: 1010,
     tooltip: 1020,
