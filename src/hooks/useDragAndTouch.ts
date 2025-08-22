@@ -107,8 +107,8 @@ export function useDragAndTouch({ onDragStart, onDragEnd, data }: UseDragAndTouc
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
     touchElement.current = e.currentTarget as HTMLElement;
     
-    // Prevenir comportamentos padrão
-    e.preventDefault();
+    // NÃO prevenir comportamentos padrão no touchStart para permitir clicks
+    // O preventDefault será chamado apenas no touchMove quando realmente arrastar
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLElement>) => {

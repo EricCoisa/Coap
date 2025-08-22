@@ -3,7 +3,7 @@ import Sidebar from '../../components/sidebar/sidebar';
 import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps } from '../../types';
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
-import { MoveObject, AddObject } from '../../store/application/actions/applicationAction';
+import { MoveObject, AddObject, SetInsertMode } from '../../store/application/actions/applicationAction';
 import { useSidebar } from '../../hooks/useSidebar';
 import { 
   EditorContainer, 
@@ -13,12 +13,14 @@ import {
   CanvasTitle
 } from './editor.styles';
 import { ObjectElements } from '../../types/objects/index';
+import type { AnyObject } from '../../types/objects/index';
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
-    objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? []
+    objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? [],
+    insertMode: _state.ApplicationReducer.insertMode
   }),
-  { MoveObject, AddObject }
+  { MoveObject, AddObject, SetInsertMode }
 );
 
 export interface EditorProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
@@ -29,7 +31,21 @@ export interface EditorProps extends BaseComponentProps, PropsFromRedux<typeof c
 function Editor(props : EditorProps) {
   const [showDropZone, setShowDropZone] = useState(false);
   const { isMinimized } = useSidebar();
-  const { AddObject, objectsUsed } = props;
+  const { AddObject, objectsUsed, insertMode, SetInsertMode } = props;
+
+  // Função para lidar com click na área vazia em modo inserção
+  function handleEmptyAreaClick() {
+    if (insertMode?.isActive && insertMode.selectedObject) {
+      // Usar o mesmo padrão que já funciona no drag/drop
+      const newObject = {
+        ...insertMode.selectedObject,
+        id: undefined // O reducer irá gerar um novo ID
+      } as unknown as AnyObject; // Cast para contornar tipagem
+      AddObject(newObject, 0);
+      // Desativar modo inserção
+      SetInsertMode(false);
+    }
+  }
 
   // Listener para eventos de touch drop
   useEffect(() => {
@@ -121,7 +137,26 @@ function Editor(props : EditorProps) {
             onDrop={handleCanvasDrop}
           >
             {objectsUsed.length === 0 ? (
-              <p>Arraste objetos da sidebar para começar a criar seu conteúdo educacional.</p>
+              <div 
+                onClick={handleEmptyAreaClick}
+                style={{
+                  padding: '2rem',
+                  textAlign: 'center' as const,
+                  cursor: insertMode?.isActive ? 'pointer' : 'default',
+                  backgroundColor: insertMode?.isActive ? 'rgba(0, 122, 204, 0.1)' : 'transparent',
+                  border: insertMode?.isActive ? '2px dashed #007acc' : 'none',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {insertMode?.isActive ? (
+                  <p style={{ color: '#007acc', fontWeight: 'bold' }}>
+                    🎯 Clique aqui para adicionar "{insertMode.selectedObject?.label}"
+                  </p>
+                ) : (
+                  <p>Clique em um objeto da sidebar para começar a criar seu conteúdo educacional.</p>
+                )}
+              </div>
             ) : (
               <>
                 {objectsUsed.map((o, i) => {

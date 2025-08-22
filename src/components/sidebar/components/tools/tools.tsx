@@ -4,16 +4,17 @@ import type { BaseComponentProps } from '../../../../types';
 import { connectUtil, type PropsFromRedux } from '../../../../utils/reduxUtil';
 import { ToolsContainer, ToolsOptions, ToolsContent } from './tools.styles';
 import Switch from '../../../switch/switch';
-import { AddObject, SetToolbar } from '../../../../store/application/actions/applicationAction';
+import { AddObject, SetToolbar, SetInsertMode } from '../../../../store/application/actions/applicationAction';
 import { ObjectButton } from './components/objectButton';
 import type { AnyObject } from '../../../../types/objects';
 
 const connector = connectUtil(
   (state: RootStateBase) => ({
     objectsList: state.ApplicationReducer.ObjectsList ?? [],
-    toolbar: state.ApplicationReducer.toolbar
+    toolbar: state.ApplicationReducer.toolbar,
+    insertMode: state.ApplicationReducer.insertMode
   }),
-  { SetToolbar, AddObject }
+  { SetToolbar, AddObject, SetInsertMode }
 );
 
 export interface ToolsProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
@@ -26,9 +27,16 @@ function ToolsComponent(props : ToolsProps) {
     props.SetToolbar(!props.toolbar);
   }
 
-
- function handleAddObject(object: AnyObject) {
-    if (props.AddObject) props.AddObject(object);
+  // Função para ativar modo de inserção (agora para mobile E desktop)
+  function handleInsertModeClick(object: AnyObject) {
+    // SEMPRE usar modo de inserção (tanto mobile quanto desktop)
+    if (props.insertMode?.isActive && props.insertMode?.selectedObject?.id === object.id) {
+      // Se já está no modo de inserção com o mesmo objeto, desativa
+      props.SetInsertMode(false);
+    } else {
+      // Ativa o modo de inserção com este objeto
+      props.SetInsertMode(true, object);
+    }
   }
 
   return (
@@ -47,7 +55,13 @@ function ToolsComponent(props : ToolsProps) {
         <ToolsContainer>
           {props.objectsList.length > 0 && (
             props.objectsList.map(obj => (
-              <ObjectButton handleAddObject={handleAddObject} key={obj.id} obj={obj} />
+              <ObjectButton 
+                handleAddObject={handleInsertModeClick} 
+                key={obj.id} 
+                obj={obj}
+                isSelected={props.insertMode?.isActive && props.insertMode?.selectedObject?.id === obj.id}
+                isInsertMode={props.insertMode?.isActive || false}
+              />
             ))
         )}
         </ToolsContainer>

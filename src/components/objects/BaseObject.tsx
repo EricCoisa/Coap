@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoveObject, RemoveObject, AddObject } from '../../store/application/actions/applicationAction';
+import { MoveObject, RemoveObject, AddObject, SetInsertMode } from '../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps } from '../../types';
 import type { AnyObject, ObjectMode } from '../../types/objects/index';
@@ -20,9 +20,10 @@ import {
 const connector = connectUtil(
   (_state: RootStateBase) => ({
     objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? [],
-    toolbar: _state.ApplicationReducer.toolbar
+    toolbar: _state.ApplicationReducer.toolbar,
+    insertMode: _state.ApplicationReducer.insertMode
   }),
-  { RemoveObject, MoveObject, AddObject }
+  { RemoveObject, MoveObject, AddObject, SetInsertMode }
 );
 
 export interface IBaseObjectProps {
@@ -38,6 +39,9 @@ function BaseObject(props: BaseObjectProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [showDropZones, setShowDropZones] = useState(false);
   const [activeDropZone, setActiveDropZone] = useState<'top' | 'bottom' | null>(null);
+
+  // Verifica se deve mostrar as DropZones (drag normal ou modo de inserção)
+  const shouldShowDropZones = showDropZones || (props.insertMode?.isActive && !isDragging);
 
   function handleRemove() {
     if (props.RemoveObject && props.object) {
@@ -190,6 +194,20 @@ function BaseObject(props: BaseObjectProps) {
     setActiveDropZone(null);
   }
 
+  // Função para inserção por clique (modo mobile)
+  function handleTopZoneClick() {
+    if (props.insertMode?.isActive && props.insertMode.selectedObject && props.AddObject) {
+      const insertIndex = props.index; // Inserir acima
+      const newObject = {
+        ...props.insertMode.selectedObject,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9) // Gera ID temporário
+      };
+      
+      props.AddObject(newObject, insertIndex);
+      props.SetInsertMode(false); // Desativa o modo de inserção
+    }
+  }
+
   function handleBottomZoneDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
@@ -227,6 +245,20 @@ function BaseObject(props: BaseObjectProps) {
     setActiveDropZone(null);
   }
 
+  // Função para inserção por clique na zona inferior (modo mobile)
+  function handleBottomZoneClick() {
+    if (props.insertMode?.isActive && props.insertMode.selectedObject && props.AddObject) {
+      const insertIndex = props.index + 1; // Inserir abaixo
+      const newObject = {
+        ...props.insertMode.selectedObject,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9) // Gera ID temporário
+      };
+      
+      props.AddObject(newObject, insertIndex);
+      props.SetInsertMode(false); // Desativa o modo de inserção
+    }
+  }
+
   return (
     <div
       style={{ position: 'relative' }}
@@ -235,15 +267,25 @@ function BaseObject(props: BaseObjectProps) {
       onDragLeave={handleDragLeave}
     >
       {/* DragSuperior - só aparece quando showDropZones é true */}
-      {showDropZones && !isDragging && (
+      {shouldShowDropZones && !isDragging && (
         <DropZoneTop
           onDragOver={handleTopZoneDragOver}
           onDrop={handleTopZoneDrop}
+          onClick={props.insertMode?.isActive ? handleTopZoneClick : undefined}
           activeDropZone={activeDropZone}
+          style={{ 
+            cursor: props.insertMode?.isActive ? 'pointer' : 'default',
+            zIndex: props.insertMode?.isActive ? 1000 : 'auto'
+          }}
         >
           <DropZoneContent>
             <span>⬆️</span>
-            <span>Soltar aqui (acima)</span>
+            <span>
+              {props.insertMode?.isActive ? 
+                `Clique para adicionar ${props.insertMode.selectedObject?.label} aqui (acima)` : 
+                'Soltar aqui (acima)'
+              }
+            </span>
             <span>⬆️</span>
           </DropZoneContent>
         </DropZoneTop>
@@ -252,7 +294,7 @@ function BaseObject(props: BaseObjectProps) {
       {/* BaseObject Children */}
       <BaseObjectContainer
         $isDragging={isDragging}
-        $showDropZones={showDropZones}
+        $showDropZones={shouldShowDropZones || false}
       >
         {props.mode === 'edit' && props.toolbar &&
 
@@ -288,15 +330,25 @@ function BaseObject(props: BaseObjectProps) {
       </BaseObjectContainer>
 
       {/* DragInferior - só aparece quando showDropZones é true */}
-      {showDropZones && !isDragging && (
+      {shouldShowDropZones && !isDragging && (
         <DropZoneBottom
           onDragOver={handleBottomZoneDragOver}
           onDrop={handleBottomZoneDrop}
+          onClick={props.insertMode?.isActive ? handleBottomZoneClick : undefined}
           activeDropZone={activeDropZone}
+          style={{ 
+            cursor: props.insertMode?.isActive ? 'pointer' : 'default',
+            zIndex: props.insertMode?.isActive ? 1000 : 'auto'
+          }}
         >
           <DropZoneContent>
             <span>⬇️</span>
-            <span>Soltar aqui (abaixo)</span>
+            <span>
+              {props.insertMode?.isActive ? 
+                `Clique para adicionar ${props.insertMode.selectedObject?.label} aqui (abaixo)` : 
+                'Soltar aqui (abaixo)'
+              }
+            </span>
             <span>⬇️</span>
           </DropZoneContent>
         </DropZoneBottom>
