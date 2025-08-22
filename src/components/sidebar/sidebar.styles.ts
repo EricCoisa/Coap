@@ -86,7 +86,7 @@ export const MinimizeButton = styled.button<{ $isMinimized?: boolean; $toolbar?:
     outline: 2px solid ${({ theme }) => theme.colors.primary};
     outline-offset: 2px;
   }
-
+  
   ${mediaQueries.sidebarCollapse} {
     display: block;
     position: fixed;
@@ -102,7 +102,7 @@ export const MinimizeButton = styled.button<{ $isMinimized?: boolean; $toolbar?:
     color: ${({ theme, $isMinimized }) => $isMinimized ? theme.colors.surface : theme.colors.text};
     border-radius: 16px;
         top: ${({ $isMinimized, $toolbar, $currentQuill }) => $isMinimized 
-      ? `calc(var(--header-height, ${($toolbar == true && $currentQuill == true) ? '102px' : '56px'}) + 8px)`
+      ? `calc(var(--header-height, ${($toolbar == false && $currentQuill == true) ? '102px' : '56px'}) + 8px)`
       : `calc(var(--sidebar-height, 70vh) + 8px)`};
 
     /* Usa variáveis CSS para garantir responsividade. Ajuste --header-height e --toolbar-height no layout principal. */

@@ -3,6 +3,8 @@ import Quill, { Delta } from 'quill';
 import 'quill/dist/quill.snow.css';
 // Importar módulos específicos do Quill para garantir funcionalidade
 import 'quill/dist/quill.core.css';
+// Importar correções para mobile
+import './quill-mobile.css';
 import './quill-mobile-width.css';
 import { RichTextContainer } from './richtext.styles';
 import type { ObjectMode } from '../../../types/objects';

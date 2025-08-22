@@ -32,6 +32,8 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 9999 !important;
+    position: absolute !important;
   }
   
   .ql-picker-item:hover {
@@ -58,35 +60,109 @@
     box-shadow: 0 0 0 2px rgba(0,122,204,0.2);
   }
   
-  /* SOLUÇÃO MOBILE: Permitir overflow na toolbar e containers */
-  .ql-toolbar {
+  /* CORREÇÃO COMPLETA MOBILE: Sobrescrever TODAS as regras problemáticas */
+  .ql-toolbar,
+  .ql-toolbar.ql-snow,
+  div.ql-toolbar,
+  div.ql-toolbar.ql-snow {
     overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    max-width: none !important;
+    width: auto !important;
+    white-space: normal !important;
+    flex-wrap: wrap !important;
+    height: auto !important;
+    max-height: none !important;
+    /* Remover scroll interno */
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
   }
   
-  .ql-container {
+  /* Esconder scrollbars completamente */
+  .ql-toolbar::-webkit-scrollbar,
+  .ql-toolbar.ql-snow::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  /* CORREÇÃO DOS BOTÕES: Tamanhos responsivos para mobile */
+  .ql-toolbar .ql-picker,
+  .ql-toolbar .ql-picker.ql-color-picker,
+  .ql-toolbar .ql-picker.ql-icon-picker {
+    width: auto !important;
+    min-width: 40px !important;
+    height: auto !important;
+    min-height: 32px !important;
+  }
+  
+  .ql-toolbar .ql-picker-label {
+    padding: 6px 8px !important;
+    height: auto !important;
+    min-height: 32px !important;
+    width: auto !important;
+    min-width: 32px !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    background: white !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Botões normais da toolbar */
+  .ql-toolbar button,
+  .ql-toolbar .ql-formats button {
+    width: auto !important;
+    min-width: 32px !important;
+    height: auto !important;
+    min-height: 32px !important;
+    padding: 6px 8px !important;
+    margin: 2px !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+  }
+  
+  .ql-container,
+  .ql-container.ql-snow {
     overflow: visible !important;
+    max-width: none !important;
+    max-height: none !important;
   }
   
   .ql-snow {
     overflow: visible !important;
+    max-width: none !important;
+    max-height: none !important;
+  }
+  
+  /* Garantir que os pickers sejam visíveis */
+  .ql-picker {
+    position: relative !important;
+  }
+  
+  .ql-picker.ql-expanded .ql-picker-options {
+    display: block !important;
+    z-index: 9999 !important;
+    position: absolute !important;
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
   }
 }
 
-/* GARANTIR que funcione em TODOS os dispositivos móveis */
-@media (max-width: 768px), (pointer: coarse) {
-  .ql-toolbar {
+/* Regra adicional para garantir que funcione em dispositivos touch */
+@media (pointer: coarse) {
+  .ql-toolbar,
+  .ql-toolbar.ql-snow {
     overflow: visible !important;
-  }
-  
-  .ql-container {
-    overflow: visible !important;
-  }
-  
-  .ql-snow {
-    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    white-space: normal !important;
+    flex-wrap: wrap !important;
   }
 }
- .ql-toolbar {
-    overflow: visible !important;
-    background-color: rebeccapurple;
-  }

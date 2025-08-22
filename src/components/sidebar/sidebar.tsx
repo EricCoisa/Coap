@@ -58,7 +58,7 @@ function SidebarComponent(props: SidebarProps) {
     setIsMinimized(true);
   }
 
-  useEffect(()=>{console.log("CurrentQuilllll", props.currentQuillId)},[props.currentQuillId])
+  useEffect(()=>{console.log("CurrentQuilllll", props.currentQuillId != null, "Toolbar", props.toolbar)},[props.currentQuillId, props.toolbar])
   return (
     <>
       <SidebarOverlay $isVisible={!isMinimized} onClick={handleOverlayClick} />

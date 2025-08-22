@@ -8,7 +8,7 @@ const INITIAL_STATE: ApplicationState = {
     ObjectsList: InitialObjects,
     ObjectsUsed: [],
     viewMode: 'editor',
-    toolbar: true,
+    toolbar: false,
     insertMode: {
         isActive: false,
         selectedObject: undefined
