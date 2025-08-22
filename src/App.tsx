@@ -15,6 +15,7 @@ import { Limpar, LoadFirstTime, LoadObjects, Save, SetViewMode } from './store/a
 import { useEffect, useState } from 'react'
 import Modal from './components/modal/modal'
 import ImportModal from './components/modals/importModal/importModal';
+import Resetodal from './components/modals/resetModal/resetModal';
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
@@ -28,6 +29,7 @@ function App(props: PropsFromRedux<typeof connector>) {
     const { objectused } = props;
     const [firstTime, setFirstTime] = useState(false);
     const [importModal, setImportModal] = useState(false);
+    const [resetModal, setResetModal] = useState(false);
 
     function handleCloseModal() {
       setFirstTime(false);
@@ -66,6 +68,7 @@ function App(props: PropsFromRedux<typeof connector>) {
   }
 
   function handleReset() {
+    setResetModal(false)
     Limpar()
     props.LoadObjects([])
   }
@@ -114,6 +117,20 @@ function App(props: PropsFromRedux<typeof connector>) {
     // TODO: Implementar lógica de importação
   }
 
+
+  
+  function handleResetModal() {
+    setResetModal(true)
+    console.log('Importando conteúdo...')
+    // TODO: Implementar lógica de importação
+  }
+
+    function handleCloseResetModal() {
+    setResetModal(false)
+    // TODO: Implementar lógica de importação
+  }
+
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyles />
@@ -123,7 +140,7 @@ function App(props: PropsFromRedux<typeof connector>) {
         <Header
           currentMode={props.viewMode}
           onModeChange={handleModeChange}
-          onReset={handleReset}
+          onReset={handleResetModal}
           onExport={handleExport}
           onImport={handleImport}
         />
@@ -139,6 +156,10 @@ function App(props: PropsFromRedux<typeof connector>) {
 
             <Modal size='lg' onClose={handleCloseImportModal} isOpen={importModal}>
               <ImportModal onClose={handleCloseImportModal}></ImportModal>
+            </Modal>
+
+            <Modal size='lg' onClose={handleCloseResetModal} isOpen={resetModal}>
+              <Resetodal onAccept={handleReset} onDeny={handleCloseResetModal}></Resetodal>
             </Modal>
       </SidebarProvider>
     </ThemeProvider>
