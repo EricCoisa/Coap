@@ -31,8 +31,6 @@ function Editor(props : EditorProps) {
   const { isMinimized } = useSidebar();
   const { AddObject, objectsUsed } = props;
 
-  useEffect(()=>{console.log(objectsUsed)},[objectsUsed]);
-
   // Listener para eventos de touch drop
   useEffect(() => {
     function handleTouchDrop(e: CustomEvent) {
@@ -108,6 +106,7 @@ function Editor(props : EditorProps) {
     
     setShowDropZone(false);
   }
+
   return (
     <EditorContainer className={props.className} style={props.style} $sidebarExpanded={!isMinimized}>
       <EditorContent>

@@ -11,6 +11,8 @@ import type { ObjectMode } from '../../../types/objects';
 import type { BaseComponentProps } from '../../../types';
 import type { RootStateBase } from '../../../store/rootReducer';
 import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
+import { SetCurrentQuill } from '../../../store/quill/actions/quillActions';
+import { registerQuill, unregisterQuill, generateQuillId } from '../../../utils/quillRegistry';
 
 // Tipos para configuração da toolbar do Quill
 
@@ -101,9 +103,10 @@ const defaultFormats = [
 
 const connector = connectUtil(
   (_state : RootStateBase) => ({
-     toolbarState: _state.ApplicationReducer.toolbar ?? []
+     toolbarState: _state.ApplicationReducer.toolbar ?? [],
+     currentQuillId: _state.QuillReducer.currentQuillId ?? null,
   }),
-  { }
+  { SetCurrentQuill }
 );
 
 export interface TextData  {
@@ -114,9 +117,12 @@ export interface TextData  {
 
 
 function RichText(props: RichTextProps) {
-  const { value, setValue, mode, toolbar, formats, toolbarState } = props;
+  const { value, setValue, mode, toolbar, formats, toolbarState, SetCurrentQuill } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const quillInstance = useRef<Quill | null>(null);
+  const quillId = useRef<string | null>(null);
+  const focusListenerRef = useRef<(() => void) | null>(null);
+  const editorElementRef = useRef<HTMLElement | null>(null);
   const isUpdating = useRef(false);
   const [isQuillInitialized, setIsQuillInitialized] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -140,10 +146,7 @@ function RichText(props: RichTextProps) {
 
   // Configurar módulos e formatos baseado nas props usando useMemo
   const quillModules = useMemo(() => {
-    if (toolbarState === false) {
-      return { toolbar: false };
-    }
-
+  
     if (toolbar !== undefined) {
       if (toolbar === false) {
         return { toolbar: false };
@@ -248,6 +251,41 @@ function RichText(props: RichTextProps) {
             console.log('Listener ignorado - isUpdating:', isUpdating.current, 'quillInstance:', !!quillInstance.current);
           }
         });
+
+        // Listener para foco - definir como Quill ativo quando clicado/focado
+        quillInstance.current.on('selection-change', (range) => {
+          if (range && quillId.current) {
+            console.log('Quill focado - definindo como ativo:', quillId.current);
+            SetCurrentQuill(quillId.current);
+          }
+        });
+
+        // Função nomeada para o handler de foco
+        function handleEditorFocus() {
+          if (quillId.current) {
+            console.log('Editor focado - definindo como ativo:', quillId.current);
+            SetCurrentQuill(quillId.current);
+          }
+        }
+
+        // Adicionar listener de foco direto no editor
+        const editor = quillInstance.current.root;
+        editor.addEventListener('focus', handleEditorFocus);
+
+        // Armazenar referências para cleanup
+        focusListenerRef.current = handleEditorFocus;
+        editorElementRef.current = editor;
+      }
+
+      // Registrar a instância do Quill no registry global
+      if (quillInstance.current) {
+        // Gerar ID único para esta instância
+        quillId.current = generateQuillId();
+        
+        // Registrar a instância no registry global
+        registerQuill(quillId.current, quillInstance.current);
+        
+        console.log('Instância Quill registrada com ID:', quillId.current);
       }
     }
 
@@ -269,7 +307,7 @@ function RichText(props: RichTextProps) {
       }
     };
 
-  }, [mode, isQuillInitialized, quillModules, quillFormats, props.defaultStyle]);
+  }, [mode, isQuillInitialized, quillModules, quillFormats, props.defaultStyle, SetCurrentQuill]);
 
   // Atualizar a toolbar dinamicamente quando toolbarState mudar
   useEffect(() => {
@@ -291,6 +329,18 @@ function RichText(props: RichTextProps) {
       if (quillInstance.current) {
         console.log('Limpando Quill - unmount');
         quillInstance.current.off('text-change');
+        quillInstance.current.off('selection-change');
+        
+        // Remover listener de foco se existir
+        if (focusListenerRef.current && editorElementRef.current) {
+          editorElementRef.current.removeEventListener('focus', focusListenerRef.current);
+        }
+        
+        // Desregistrar a instância do registry global
+        if (quillId.current) {
+          unregisterQuill(quillId.current);
+        }
+        
         quillInstance.current = null;
         setIsQuillInitialized(false);
       }
@@ -325,16 +375,26 @@ function RichText(props: RichTextProps) {
     }
   }, [value, mode, isQuillInitialized, props.defaultStyle]);
 
+
+    function handleToolBarMode() {
+      
+    }
+  
+    useEffect(()=>{
+      handleToolBarMode();
+    },[props.currentQuillId, props.toolbarState])
+
+
   if (mode === 'view') {
     return (
-      <RichTextContainer className="view-mode">
+      <RichTextContainer toolbarState={toolbarState} className="view-mode">
         <div ref={containerRef} />
       </RichTextContainer>
     );
   }
 
   return (
-    <RichTextContainer className={toolbar === false ? 'no-toolbar' : ''}>
+    <RichTextContainer toolbarState={toolbarState} className={toolbar === false ? 'no-toolbar' : ''}>
       <div ref={containerRef} />
     </RichTextContainer>
   );
