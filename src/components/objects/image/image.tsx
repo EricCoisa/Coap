@@ -105,13 +105,13 @@ function ImageObject(props: ImageProps) {
             value={data.title || ''}
             setValue={handleTitleChange}
             mode={props.mode}
-            toolbar={props.mode === 'edit' ? titleToolbar : false}
+            toolbar={props.mode === 'editor' ? titleToolbar : false}
             defaultStyle={defaultTitleStyle}
           />
         </div>
 
         {/* Upload/Configuração da imagem - apenas no modo edit */}
-        {props.mode === 'edit' && (
+        {props.mode === 'editor' && (
           <div className="image-upload-section">
             <button 
               className="collapse-button"
@@ -180,7 +180,7 @@ function ImageObject(props: ImageProps) {
             />
           ) : (
             <div className="image-placeholder">
-              {props.mode === 'edit' ? (
+              {props.mode === 'editor' ? (
                 <>
                   <span className="placeholder-icon">🖼️</span>
                   <p>Faça upload de uma imagem ou insira uma URL</p>

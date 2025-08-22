@@ -161,7 +161,7 @@ function Editor(props : EditorProps) {
               <>
                 {objectsUsed.map((o, i) => {
                   const Component = ObjectElements.find(element => element.type === o.type)?.element;
-                  return Component ? React.createElement(Component, { object: o, index: i, mode: "edit", key: o.id }) : null;
+                  return Component ? React.createElement(Component, { object: o, index: i, mode: "editor", key: o.id }) : null;
                 })}
                 
                 {/* Zona de drop no final */}

@@ -7,8 +7,7 @@ import 'quill/dist/quill.core.css';
 import './quill-mobile.css';
 import './quill-mobile-width.css';
 import { RichTextContainer } from './richtext.styles';
-import type { ObjectMode } from '../../../types/objects';
-import type { BaseComponentProps } from '../../../types';
+import type { BaseComponentProps, ViewMode } from '../../../types';
 import type { RootStateBase } from '../../../store/rootReducer';
 import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 import { SetCurrentQuill } from '../../../store/quill/actions/quillActions';
@@ -61,7 +60,7 @@ export interface RichTextResponse{
 export interface RichTextProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
     value:string | Delta;
     setValue: (value: RichTextResponse) => void;
-    mode : ObjectMode;
+    mode : ViewMode;
     toolbar?: ToolbarConfig | boolean; // Configuração da toolbar do Quill
     formats?: string[]; // Formatos permitidos do Quill
     defaultStyle?: DefaultStyle; // Estilo inicial do texto
@@ -200,11 +199,11 @@ function RichText(props: RichTextProps) {
       // Criar nova instância do Quill
       console.log("instantiate")
       quillInstance.current = new Quill(container, {
-        theme: mode === 'view' ? 'bubble' : 'snow',
-        modules: mode === 'view' ? { toolbar: false } : quillModules,
+        theme: mode === 'preview' ? 'bubble' : 'snow',
+        modules: mode === 'preview' ? { toolbar: false } : quillModules,
         formats: quillFormats,
-        placeholder: mode === 'edit' ? 'Digite seu texto rico aqui...' : '',
-        readOnly: mode === 'view'
+        placeholder: mode === 'editor' ? 'Digite seu texto rico aqui...' : '',
+        readOnly: mode === 'preview'
       });
 
       console.log('Quill criado:', quillInstance.current);
@@ -220,7 +219,7 @@ function RichText(props: RichTextProps) {
 
 
       // Aplicar estilo inicial se definido - apenas no modo edit
-      if (props.defaultStyle && mode === 'edit') {
+      if (props.defaultStyle && mode === 'editor') {
         setTimeout(() => {
           if (quillInstance.current && props.defaultStyle) {
             const length = quillInstance.current.getLength();
@@ -241,7 +240,7 @@ function RichText(props: RichTextProps) {
       }
 
       // Listener para mudanças - apenas no modo edit
-      if (mode === 'edit') {
+      if (mode === 'editor') {
         console.log('Registrando listener text-change');
         quillInstance.current.on('text-change', () => {
           console.log('Event text-change disparado!');
@@ -304,7 +303,7 @@ function RichText(props: RichTextProps) {
 
     // Atualizar readOnly quando o modo mudar
     if (quillInstance.current && isQuillInitialized) {
-      const shouldBeReadOnly = mode === 'view';
+      const shouldBeReadOnly = mode === 'preview';
       if (quillInstance.current.isEnabled() === shouldBeReadOnly) {
         quillInstance.current.enable(!shouldBeReadOnly);
       }
@@ -314,7 +313,7 @@ function RichText(props: RichTextProps) {
     return () => {
       // No Strict Mode, este cleanup roda após primeira execução
       // MAS só limpamos se realmente vamos desmontar
-      if (mode === 'edit' || mode === 'view') {
+      if (mode === 'editor' || mode === 'preview') {
         console.log('Strict Mode cleanup - mantendo instância');
         return; // Não limpar no Strict Mode se ainda estamos em uso
       }
@@ -372,7 +371,7 @@ function RichText(props: RichTextProps) {
         setQuillContent(quillInstance.current, value);
         
         // Reaplicar defaultStyle após definir o conteúdo - apenas no modo edit
-        if (props.defaultStyle && mode === 'edit') {
+        if (props.defaultStyle && mode === 'editor') {
           setTimeout(() => {
             if (quillInstance.current && props.defaultStyle) {
               const length = quillInstance.current.getLength();
@@ -432,7 +431,7 @@ function RichText(props: RichTextProps) {
 
     handleToolBarMode();
   }, [props.currentQuillId, props.toolbarState]);
-  if (mode === 'view') {
+  if (mode === 'preview') {
     return (
       <RichTextContainer toolbarState={toolbarState} className="view-mode">
         <div ref={containerRef} />

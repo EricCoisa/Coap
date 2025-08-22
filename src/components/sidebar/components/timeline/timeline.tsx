@@ -8,6 +8,7 @@ import TimeLineItem from './components/timeLineItem';
 const connector = connectUtil(
   (state: RootStateBase) => ({
     objectsUsed: state.ApplicationReducer.ObjectsUsed ?? [],
+    mode: state.ApplicationReducer.viewMode
   }),
   { }
 );
@@ -24,7 +25,7 @@ function TimeLineComponent(props : TimeLineProps) {
         <TimeLineContainer>
           {props.objectsUsed.length > 0 ? (
             props.objectsUsed.map((obj, index) => (
-              <TimeLineItem key={obj.id} obj={obj} index={index} />
+              <TimeLineItem key={obj.id} obj={obj} index={index} mode={props.mode ? props.mode : "editor"} />
             ))
           ) : (
             <div style={{ 

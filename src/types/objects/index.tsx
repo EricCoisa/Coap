@@ -7,7 +7,6 @@ import type { TitleData } from "../../components/objects/title/title.tsx";
 import type { ImageData } from "../../components/objects/image/image.tsx";
 
 export type ObjectType = 'title' | 'text' | 'image';
-export type ObjectMode = 'edit' | 'view';
 
 export interface Object<T = Record<string, unknown>> {
   id: string;

@@ -41,7 +41,7 @@ function Preview( props : PreviewProps) {
           ) : (
             props.objectsUsed.map((o, i) => {
               const Component = ObjectElements.find(element => element.type === o.type)?.element;
-              return Component ? React.createElement(Component, { object: o, index: i, mode: 'view' }) : null;
+              return Component ? React.createElement(Component, { object: o, index: i, mode: 'preview' }) : null;
             })
           )}
         </PreviewArea>
