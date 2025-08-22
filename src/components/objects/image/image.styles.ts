@@ -2,6 +2,18 @@ import styled from 'styled-components';
 import { mediaQueries } from '../../../styles/breakpoints';
 
 export const ImageContainer = styled.div`
+  @media print {
+    .main-image {
+      max-width: 100%;
+      max-height: 500px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: none;
+    }
+    .image-display {
+      min-height: 200px;
+    }
+  }
   display: flex;
   flex-direction: column;
   gap: 1rem;
