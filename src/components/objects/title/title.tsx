@@ -28,7 +28,7 @@ const titleToolBar: ToolbarConfig = [
 
 const defaultStyle: DefaultStyle = {
   bold: true,
-  color: '#ff0000',
+  color: '#646cff',
   size: 'large',
   align: 'center'
 };

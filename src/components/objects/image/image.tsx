@@ -83,7 +83,7 @@ function ImageObject(props: ImageProps) {
   
   const defaultTitleStyle: DefaultStyle = {
     bold: true,
-    color: '#ff0000',
+    color: '#3B82F6',
     size: 'large',
     align: 'center'
   };

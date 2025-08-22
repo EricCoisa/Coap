@@ -29,7 +29,7 @@ export const InitialObjects = [
     data: {
       content: 'Título de Exemplo',
       fontSize: '24px',
-      color: '#333333'
+      color: '#646cff'
     } as TitleData
   },
   {
