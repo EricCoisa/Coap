@@ -44,7 +44,7 @@ export const ActionButtonsContainer = styled.div`
 
   /* Ajustes mobile para os botões */
   @media (max-width: 768px) {
-    right: 0px;
+    right: 50px;
     flex-direction: row;
     top: -15px;
     gap: 6px;

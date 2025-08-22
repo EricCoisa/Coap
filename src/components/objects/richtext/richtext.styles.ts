@@ -3,7 +3,7 @@ import { mediaQueries } from '../../../styles/breakpoints';
 
 export const RichTextContainer = styled.div<{ toolbarState: boolean }>`
   padding: 4px; /* Drasticamente reduzido */
-  height: 100%;
+
   width: 100%;
   position: relative;
   display: flex;

@@ -52,7 +52,7 @@ export const PreviewArea = styled.div`
 export const EmptyState = styled.div`
   ${flexCenter};
   flex-direction: column;
-  height: 100%;
+
   min-height: 500px;
   text-align: center;
   color: ${({ theme }) => theme.colors.textSecondary};

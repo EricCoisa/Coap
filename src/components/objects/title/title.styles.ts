@@ -4,7 +4,6 @@ export const TextContainer = styled.div`
   font-size: 12px;
   color: #000000;
   padding: 8px;
-  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
