@@ -9,6 +9,7 @@ export const OBJECTSUSED_EDIT = 'OBJECTSUSED_EDIT';
 
 export const TOOLBAR_SET = 'TOOLBAR_SET';
 export const INSERT_MODE_SET = 'INSERT_MODE_SET';
+export const MOVE_MODE_SET = 'MOVE_MODE_SET';
 
 import type { AnyObject } from '../objects';
 
@@ -25,6 +26,10 @@ export interface ApplicationState {
     insertMode?: {
         isActive: boolean;
         selectedObject?: AnyObject;
+    };
+    moveMode?: {
+        isActive: boolean;
+        selectedObjectId?: string;
     };
 }
 export interface ApplicationViewModeAction {
@@ -89,4 +94,12 @@ export interface ApplicationInsertModeAction {
     };
 }
 
-export type ApplicationTypes = ApplicationLanguageAction | ApplicationLowPerformanceAction | ApplicationObjectsListAction | ApplicationObjectsUsedAddAction | ApplicationObjectsUsedRemoveAction | ApplicationObjectsUsedMoveAction | ApplicationObjectsUsedEditAction | ApplicationViewModeAction | ApplicationToolbarAction | ApplicationInsertModeAction;
+export interface ApplicationMoveModeAction {
+    type: typeof MOVE_MODE_SET;
+    payload: {
+        isActive: boolean;
+        selectedObjectId?: string;
+    };
+}
+
+export type ApplicationTypes = ApplicationLanguageAction | ApplicationLowPerformanceAction | ApplicationObjectsListAction | ApplicationObjectsUsedAddAction | ApplicationObjectsUsedRemoveAction | ApplicationObjectsUsedMoveAction | ApplicationObjectsUsedEditAction | ApplicationViewModeAction | ApplicationToolbarAction | ApplicationInsertModeAction | ApplicationMoveModeAction;

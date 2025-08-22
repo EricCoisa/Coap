@@ -1,6 +1,6 @@
 import type { AppThunk } from "../../../utils/reduxUtil";
 import i18n from '../../../i18n';
-import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, TOOLBAR_SET, VIEWMODE_SET, INSERT_MODE_SET } from "../../../types/application";
+import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, TOOLBAR_SET, VIEWMODE_SET, INSERT_MODE_SET, MOVE_MODE_SET } from "../../../types/application";
 import type { AnyObject } from "../../../types/objects";
 import type { ViewMode } from '../../../types';
 
@@ -78,6 +78,15 @@ export function SetInsertMode(isActive: boolean, selectedObject?: AnyObject): Ap
         dispatch({
             payload: { isActive, selectedObject },
             type: INSERT_MODE_SET
+        });
+    };
+}
+
+export function SetMoveMode(isActive: boolean, selectedObjectId?: string): AppThunk {
+    return async function dispatchSetMoveMode(dispatch) {
+        dispatch({
+            payload: { isActive, selectedObjectId },
+            type: MOVE_MODE_SET
         });
     };
 }

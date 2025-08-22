@@ -1,5 +1,5 @@
 
-import { CURRENTLANGUAGE_SET, LOWPERFORMANCE_SET, OBJECTSLIST_SET as OBJECTSLIST_SET, OBJECTSUSED_ADD, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, OBJECTSUSED_EDIT, type ApplicationState, type ApplicationTypes, VIEWMODE_SET, TOOLBAR_SET, INSERT_MODE_SET } from '../../../types/application';
+import { CURRENTLANGUAGE_SET, LOWPERFORMANCE_SET, OBJECTSLIST_SET as OBJECTSLIST_SET, OBJECTSUSED_ADD, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, OBJECTSUSED_EDIT, type ApplicationState, type ApplicationTypes, VIEWMODE_SET, TOOLBAR_SET, INSERT_MODE_SET, MOVE_MODE_SET } from '../../../types/application';
 import { InitialObjects, type AnyObject } from '../../../types/objects';
 
 const INITIAL_STATE: ApplicationState = {
@@ -12,6 +12,10 @@ const INITIAL_STATE: ApplicationState = {
     insertMode: {
         isActive: false,
         selectedObject: undefined
+    },
+    moveMode: {
+        isActive: false,
+        selectedObjectId: undefined
     }
 }
 
@@ -128,6 +132,14 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
                 insertMode: {
                     isActive: action.payload.isActive,
                     selectedObject: action.payload.selectedObject
+                }
+            };
+        case MOVE_MODE_SET:
+            return { 
+                ...state, 
+                moveMode: {
+                    isActive: action.payload.isActive,
+                    selectedObjectId: action.payload.selectedObjectId
                 }
             };
         default:

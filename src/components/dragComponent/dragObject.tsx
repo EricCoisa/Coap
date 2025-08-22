@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MoveObject, RemoveObject, AddObject, SetInsertMode } from '../../store/application/actions/applicationAction';
+import React, { useState, useEffect } from 'react';
+import { MoveObject, RemoveObject, AddObject, SetInsertMode, SetMoveMode } from '../../store/application/actions/applicationAction';
 import type { RootStateBase } from '../../store/rootReducer';
 import type { BaseComponentProps, ViewMode } from '../../types';
 import type { AnyObject } from '../../types/objects/index';
@@ -19,9 +19,10 @@ const connector = connectUtil(
   (_state: RootStateBase) => ({
     objectsUsed: _state.ApplicationReducer.ObjectsUsed ?? [],
     toolbar: _state.ApplicationReducer.toolbar,
-    insertMode: _state.ApplicationReducer.insertMode
+    insertMode: _state.ApplicationReducer.insertMode,
+    moveMode: _state.ApplicationReducer.moveMode
   }),
-  { RemoveObject, MoveObject, AddObject, SetInsertMode }
+  { RemoveObject, MoveObject, AddObject, SetInsertMode, SetMoveMode }
 );
 
 export interface IBaseObjectProps {
@@ -38,17 +39,35 @@ function DragObject(props: BaseObjectProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [showDropZones, setShowDropZones] = useState(false);
   const [activeDropZone, setActiveDropZone] = useState<'top' | 'bottom' | null>(null);
-  const [touchDrag, setTouchDrag] = useState(false);
-  const touchDragTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Verifica se deve mostrar as DropZones (drag normal ou modo de inserção)
-  const shouldShowDropZones = showDropZones || (props.insertMode?.isActive && !isDragging);
+  // Efeito para limpar zonas quando o modo de movimento muda
+  useEffect(() => {
+    // Se o modo de movimento foi desativado, limpa as zonas
+    if (!props.moveMode?.isActive) {
+      setShowDropZones(false);
+      setActiveDropZone(null);
+    }
+    // Se mudou o objeto selecionado, limpa as zonas
+    else if (props.moveMode?.selectedObjectId !== props.object.id) {
+      setShowDropZones(false);
+      setActiveDropZone(null);
+    }
+  }, [props.moveMode?.isActive, props.moveMode?.selectedObjectId, props.object.id]);
+
+  // Verifica se deve mostrar as DropZones (drag normal, modo de inserção ou modo de movimento)
+  const shouldShowDropZones = showDropZones || 
+    (props.insertMode?.isActive && !isDragging);
 
   // Função para verificar se deve mostrar o dropzone superior
   function shouldShowTopDropZone() {
     if (props.insertMode?.isActive) {
       // No insertMode, sempre mostrar dropzone acima do primeiro elemento
       return props.index === 0;
+    }
+    // Para moveMode e drag normal: só mostrar quando shouldShowDropZones é true e não está arrastando o próprio elemento
+    if (props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id) {
+      // Se é o objeto sendo movido, não mostrar dropzone
+      return false;
     }
     return shouldShowDropZones && !isDragging;
   }
@@ -57,8 +76,12 @@ function DragObject(props: BaseObjectProps) {
   function shouldShowBottomDropZone() {
     if (props.insertMode?.isActive) {
       // No insertMode, sempre mostrar dropzone abaixo de todos os elementos
-      // Isso garante que haja sempre um dropzone entre elementos e após o último
       return true;
+    }
+    // Para moveMode e drag normal: só mostrar quando shouldShowDropZones é true e não está arrastando o próprio elemento
+    if (props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id) {
+      // Se é o objeto sendo movido, não mostrar dropzone
+      return false;
     }
     return shouldShowDropZones && !isDragging;
   }
@@ -82,33 +105,22 @@ function DragObject(props: BaseObjectProps) {
     e.currentTarget.style.cursor = 'grab';
   }
 
-  // Touch events para mobile
-  function handleDragIconTouchStart(e: React.TouchEvent<HTMLButtonElement>) {
-    // Inicia drag após toque longo (500ms)
-    touchDragTimeout.current = setTimeout(() => {
-      setTouchDrag(true);
-      setIsDragging(true);
-      setShowDropZones(true);
-      globalDragState.isDragging = true;
-      globalDragState.draggedObjectId = props.object.id;
-      globalDragState.isSidebarDrag = false;
-    }, 500);
-  }
-
-  function handleDragIconTouchEnd(e: React.TouchEvent<HTMLButtonElement>) {
-    if (touchDragTimeout.current) {
-      clearTimeout(touchDragTimeout.current);
-      touchDragTimeout.current = null;
-    }
-    // Se estava em drag por touch, encerra
-    if (touchDrag) {
-      setTouchDrag(false);
-      setIsDragging(false);
-      setShowDropZones(false);
-      setActiveDropZone(null);
-      globalDragState.isDragging = false;
-      globalDragState.draggedObjectId = null;
-      globalDragState.isSidebarDrag = false;
+  // Função para ativar/desativar o modo de movimento (mobile)
+  function handleDragIconClick() {
+    if (props.SetMoveMode) {
+      if (props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id) {
+        // Se já está ativo para este objeto, desativa
+        props.SetMoveMode(false);
+        // Limpa o estado local das zonas de drop
+        setShowDropZones(false);
+        setActiveDropZone(null);
+      } else {
+        // Ativa o modo de movimento para este objeto
+        props.SetMoveMode(true, props.object.id);
+        // Limpa o estado local das zonas de drop ao ativar
+        setShowDropZones(false);
+        setActiveDropZone(null);
+      }
     }
   }
 
@@ -177,6 +189,31 @@ function DragObject(props: BaseObjectProps) {
     }
   }
 
+  // Detecta quando o mouse entra no elemento durante modo de movimento
+  function handleMouseEnter() {
+    // Se está no modo de movimento e não é o próprio objeto sendo movido
+    if (props.moveMode?.isActive && props.moveMode.selectedObjectId !== props.object.id) {
+      setShowDropZones(true);
+    }
+  }
+
+  // Remove as zonas quando o mouse sai do elemento durante modo de movimento
+  function handleMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
+    // Se está no modo de movimento, esconde as drop zones
+    if (props.moveMode?.isActive) {
+      // Verifica se realmente saiu do container (similar à lógica do drag)
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+
+      // Só remove as drop zones se o mouse realmente saiu da área do container
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        setShowDropZones(false);
+        setActiveDropZone(null);
+      }
+    }
+  }
+
   // Handlers para as zonas de drop específicas
   function handleTopZoneDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -227,24 +264,6 @@ function DragObject(props: BaseObjectProps) {
     setActiveDropZone(null);
   }
 
-  // Drop por toque (mobile)
-  function handleTopZoneTouch(e: React.TouchEvent<HTMLDivElement>) {
-    if (touchDrag && globalDragState.draggedObjectId) {
-      const draggedObject = props.objectsUsed.find(obj => obj.id === globalDragState.draggedObjectId);
-      if (draggedObject && props.MoveObject) {
-        const newIndex = props.index;
-        props.MoveObject(draggedObject, newIndex);
-      }
-      setTouchDrag(false);
-      setIsDragging(false);
-      setShowDropZones(false);
-      setActiveDropZone(null);
-      globalDragState.isDragging = false;
-      globalDragState.draggedObjectId = null;
-      globalDragState.isSidebarDrag = false;
-    }
-  }
-
   // Função para inserção por clique (modo mobile)
   function handleTopZoneClick() {
     if (props.insertMode?.isActive && props.insertMode.selectedObject && props.AddObject) {
@@ -256,6 +275,18 @@ function DragObject(props: BaseObjectProps) {
 
       props.AddObject(newObject, insertIndex);
       props.SetInsertMode(false); // Desativa o modo de inserção
+    }
+    // Modo de movimento - só funciona se as zonas estão visíveis (quando o mouse está sobre o elemento)
+    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && shouldShowDropZones) {
+      const draggedObject = props.objectsUsed.find(obj => obj.id === props.moveMode?.selectedObjectId);
+      if (draggedObject) {
+        const newIndex = props.index; // Mover para acima
+        props.MoveObject(draggedObject, newIndex);
+        props.SetMoveMode(false); // Desativa o modo de movimento
+        // Força a limpeza das zonas após o movimento
+        setShowDropZones(false);
+        setActiveDropZone(null);
+      }
     }
   }
 
@@ -296,24 +327,6 @@ function DragObject(props: BaseObjectProps) {
     setActiveDropZone(null);
   }
 
-  // Drop por toque (mobile)
-  function handleBottomZoneTouch(e: React.TouchEvent<HTMLDivElement>) {
-    if (touchDrag && globalDragState.draggedObjectId) {
-      const draggedObject = props.objectsUsed.find(obj => obj.id === globalDragState.draggedObjectId);
-      if (draggedObject && props.MoveObject) {
-        const newIndex = props.index + 1;
-        props.MoveObject(draggedObject, newIndex);
-      }
-      setTouchDrag(false);
-      setIsDragging(false);
-      setShowDropZones(false);
-      setActiveDropZone(null);
-      globalDragState.isDragging = false;
-      globalDragState.draggedObjectId = null;
-      globalDragState.isSidebarDrag = false;
-    }
-  }
-
   // Função para inserção por clique na zona inferior (modo mobile)
   function handleBottomZoneClick() {
     if (props.insertMode?.isActive && props.insertMode.selectedObject && props.AddObject) {
@@ -326,6 +339,18 @@ function DragObject(props: BaseObjectProps) {
       props.AddObject(newObject, insertIndex);
       props.SetInsertMode(false); // Desativa o modo de inserção
     }
+    // Modo de movimento - só funciona se as zonas estão visíveis (quando o mouse está sobre o elemento)
+    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && shouldShowDropZones) {
+      const draggedObject = props.objectsUsed.find(obj => obj.id === props.moveMode?.selectedObjectId);
+      if (draggedObject) {
+        const newIndex = props.index + 1; // Mover para abaixo
+        props.MoveObject(draggedObject, newIndex);
+        props.SetMoveMode(false); // Desativa o modo de movimento
+        // Força a limpeza das zonas após o movimento
+        setShowDropZones(false);
+        setActiveDropZone(null);
+      }
+    }
   }
 
   return (
@@ -334,18 +359,19 @@ function DragObject(props: BaseObjectProps) {
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* DragSuperior - só aparece quando shouldShowTopDropZone() é true */}
       {shouldShowTopDropZone() && (
         <DropZoneTop
           onDragOver={handleTopZoneDragOver}
           onDrop={handleTopZoneDrop}
-          onClick={props.insertMode?.isActive ? handleTopZoneClick : undefined}
-          onTouchEnd={handleTopZoneTouch}
+          onClick={(props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? handleTopZoneClick : undefined}
           activeDropZone={activeDropZone}
           style={{
-            cursor: props.insertMode?.isActive || touchDrag ? 'pointer' : 'default',
-            zIndex: props.insertMode?.isActive ? 1000 : 'auto'
+            cursor: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 'pointer' : 'default',
+            zIndex: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 1000 : 'auto'
           }}
         >
           <DropZoneContent $isTimeLine={props.isTimeLine}>
@@ -353,7 +379,7 @@ function DragObject(props: BaseObjectProps) {
             <span>
               {props.insertMode?.isActive ?
                 `Inserir ${props.insertMode.selectedObject?.label} aqui...` :
-                touchDrag ? 'Soltar aqui (acima)' : 'Soltar aqui (acima)'
+                (props.moveMode?.isActive && shouldShowDropZones) ? 'Mover para cima' : 'Soltar aqui (acima)'
               }
             </span>
             <span>⬆️</span>
@@ -369,9 +395,15 @@ function DragObject(props: BaseObjectProps) {
           onMouseLeave={handleDragIconMouseLeave}
           onMouseDown={handleDragIconMouseDown}
           onMouseUp={handleDragIconMouseUp}
-          onTouchStart={handleDragIconTouchStart}
-          onTouchEnd={handleDragIconTouchEnd}
-          title="Arrastar para mover"
+          onClick={handleDragIconClick}
+          title={props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id ? 
+            "Clique nas zonas de drop para mover" : 
+            "Arrastar para mover ou clique para ativar modo de movimento"
+          }
+          style={{
+            backgroundColor: props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id ? 
+              '#28a745' : undefined
+          }}
         >
           <span>⋮⋮</span>
         </DragIcon>
@@ -385,12 +417,11 @@ function DragObject(props: BaseObjectProps) {
         <DropZoneBottom
           onDragOver={handleBottomZoneDragOver}
           onDrop={handleBottomZoneDrop}
-          onClick={props.insertMode?.isActive ? handleBottomZoneClick : undefined}
-          onTouchEnd={handleBottomZoneTouch}
+          onClick={(props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? handleBottomZoneClick : undefined}
           activeDropZone={activeDropZone}
           style={{
-            cursor: props.insertMode?.isActive || touchDrag ? 'pointer' : 'default',
-            zIndex: props.insertMode?.isActive ? 1000 : 'auto'
+            cursor: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 'pointer' : 'default',
+            zIndex: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 1000 : 'auto'
           }}
         >
           <DropZoneContent $isTimeLine={props.isTimeLine}>
@@ -398,7 +429,7 @@ function DragObject(props: BaseObjectProps) {
             <span>
               {props.insertMode?.isActive ?
                 `Inserir ${props.insertMode.selectedObject?.label} aqui...` :
-                touchDrag ? 'Soltar aqui (abaixo)' : 'Soltar aqui (abaixo)'
+                (props.moveMode?.isActive && shouldShowDropZones) ? 'Mover para baixo' : 'Soltar aqui (abaixo)'
               }
             </span>
             <span>⬇️</span>
