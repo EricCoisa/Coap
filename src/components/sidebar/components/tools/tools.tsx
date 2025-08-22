@@ -2,8 +2,7 @@
 import type { RootStateBase } from '../../../../store/rootReducer';
 import type { BaseComponentProps } from '../../../../types';
 import { connectUtil, type PropsFromRedux } from '../../../../utils/reduxUtil';
-import { ToolsContainer, ToolsOptions, ToolsContent } from './tools.styles';
-import Switch from '../../../switch/switch';
+import { ToolsContainer, ToolsContent } from './tools.styles';
 import { AddObject, SetToolbar, SetInsertMode } from '../../../../store/application/actions/applicationAction';
 import { ObjectButton } from './components/objectButton';
 import type { AnyObject } from '../../../../types/objects';
@@ -24,10 +23,6 @@ export interface ToolsProps extends BaseComponentProps, PropsFromRedux<typeof co
 
 function ToolsComponent(props : ToolsProps) {
   const { setIsMinimized } = useSidebar();
-
-   function handleToolbar() {
-    props.SetToolbar(!props.toolbar);
-  }
 
   // Função para ativar modo de inserção (agora para mobile E desktop)
   function handleInsertModeClick(object: AnyObject) {
@@ -51,16 +46,7 @@ function ToolsComponent(props : ToolsProps) {
 
   return (
     
-      <ToolsContent $isMinimized={props.isMinimized}>
-         
-        {/* Controle de ferramentas */}
-        <ToolsContainer>
-           <ToolsOptions style={{ alignItems: 'center', gap: '10px', display: 'flex' }}>
-            <label style={{ margin: 0, whiteSpace: 'nowrap', fontWeight: 500 }}>Ferramentas Fixa</label>
-            <Switch checked={props.toolbar} onChange={handleToolbar} />
-           </ToolsOptions>
-        </ToolsContainer>
-        
+      <ToolsContent $isMinimized={props.isMinimized}>  
         {/* Lista de objetos disponíveis */}
         <ToolsContainer>
           {props.objectsList.length > 0 && (

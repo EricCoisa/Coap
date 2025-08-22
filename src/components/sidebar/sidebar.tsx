@@ -3,10 +3,12 @@ import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
 import { Sidebar, MinimizeButton, SidebarOverlay } from './sidebar.styles';
 import { useSidebar } from '../../hooks/useSidebar';
 import TimeLine from './components/timeline/timeline';
-import Tools from './components/tools/tools';
-import SidebarSection from './components/sidebarSection';
+
+import SidebarSection from './components/sidebarSection/sidebarSection';
 import type { RootStateBase } from '../../store/rootReducer';
 import { useEffect, useRef } from 'react';
+import Tools from './components/tools/tools';
+import SideBarOptions from './components/options/sideBarOptions';
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
@@ -63,6 +65,11 @@ function SidebarComponent(props: SidebarProps) {
     <>
       <SidebarOverlay $isVisible={!isMinimized} onClick={handleOverlayClick} />
       <Sidebar ref={sidebarRef} className={props.className} style={props.style} $isMinimized={isMinimized}>
+        <SidebarSection title="Opções" collapsible={true}>
+          <SideBarOptions isMinimized={isMinimized} />
+        </SidebarSection>
+
+        
         <SidebarSection title="Objetos" collapsible={true}>
           <Tools isMinimized={isMinimized} />
         </SidebarSection>

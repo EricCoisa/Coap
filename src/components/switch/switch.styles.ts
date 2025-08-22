@@ -29,7 +29,7 @@ export const SwitchButton = styled.button<{ checked: boolean }>`
     width: clamp(14px, 3vw, 16px);
     height: clamp(14px, 3vw, 16px);
     border-radius: 50%;
-    background: ${({ theme }) => theme.colors.text};
+    background: ${({ checked, theme }) => checked ? '#fff' : theme.colors.textSecondary};
     transition: all 0.3s ease;
     transform: translateY(-50%);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
