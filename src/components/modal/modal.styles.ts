@@ -52,6 +52,16 @@ export const ModalContainer = styled.div<{
   display: flex;
   flex-direction: column;
   animation: ${({ state }) => state === 'exiting' ? scaleOut : scaleIn} 0.25s cubic-bezier(.4,0,.2,1);
+
+  @media (max-width: 600px) {
+    min-width: 0;
+    max-width: 96vw;
+    width: 96vw;
+    min-height: 0;
+    padding: 16px 8px 24px 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
 `;
 
 export const ModalHeader = styled.div`
