@@ -49,7 +49,7 @@ export const InitialObjects = [
     label: 'Imagem',
     icon: '🖼️',
     data: {
-      imageUrl: "/vite.svg",
+      imageUrl: "/default.png",
       imageAlt: "Exemplo de Imagem",
       source: "Fonte:Local",
       title: "Título da Imagem"

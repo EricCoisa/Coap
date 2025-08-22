@@ -88,7 +88,7 @@ function SidebarComponent(props : SidebarProps) {
       <SidebarContent $isMinimized={isMinimized}>
         <ToolsContainer>
            <ToolsOptions style={{ alignItems: 'center', gap: '10px', display: 'flex' }}>
-            <label style={{ margin: 0, whiteSpace: 'nowrap', fontWeight: 500 }}>Barra de Ferramentas</label>
+            <label style={{ margin: 0, whiteSpace: 'nowrap', fontWeight: 500 }}>Ferramentas Fixa</label>
             <Switch checked={props.toolbar} onChange={handleToolbar} />
            </ToolsOptions>
         </ToolsContainer>

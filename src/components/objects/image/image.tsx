@@ -7,6 +7,7 @@ import type { DefaultStyle, ToolbarConfig } from '../richtext/richtext';
 import type { ToolbarOption } from '../richtext/richtext';
 import { ImageContainer } from './image.styles';
 import type { Delta } from 'quill';
+import { useState } from 'react';
 
 const connector = connectUtil(
   (_state : RootStateBase) => ({
@@ -29,6 +30,7 @@ export interface ImageProps extends IBaseObjectProps, PropsFromRedux<typeof conn
 
 function ImageObject(props: ImageProps) {
   const data = props.object.data as unknown as ImageData;
+  const [isUploadSectionCollapsed, setIsUploadSectionCollapsed] = useState(false);
   
   function handleTitleChange(value: RichTextResponse) {
     props.EditObject(props.object.id, { ...props.object.data, title: value.delta });
@@ -65,6 +67,10 @@ function ImageObject(props: ImageProps) {
       ...props.object.data, 
       imageAlt 
     });
+  }
+
+  function toggleUploadSection() {
+    setIsUploadSectionCollapsed(!isUploadSectionCollapsed);
   }
 
   // Toolbars corrigidas para tipagem
@@ -107,46 +113,59 @@ function ImageObject(props: ImageProps) {
         {/* Upload/Configuração da imagem - apenas no modo edit */}
         {props.mode === 'edit' && (
           <div className="image-upload-section">
-            <div className="upload-controls">
-              <label htmlFor={`image-upload-${props.object.id}`} className="upload-button">
-                📁 Escolher Arquivo
-              </label>
-              <input
-                id={`image-upload-${props.object.id}`}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: 'none' }}
-              />
-              
-              <div className="url-input-group">
-                <label htmlFor={`image-url-${props.object.id}`}>
-                  🔗 Ou inserir URL da imagem:
+            <button 
+              className="collapse-button"
+              onClick={toggleUploadSection}
+              aria-label={isUploadSectionCollapsed ? "Expandir configurações" : "Recolher configurações"}
+            >
+              <span className={`arrow ${isUploadSectionCollapsed ? 'collapsed' : 'expanded'}`}>
+                ▼
+              </span>
+              {isUploadSectionCollapsed ? 'Mostrar configurações' : 'Ocultar configurações'}
+            </button>
+            
+            {!isUploadSectionCollapsed && (
+              <div className="upload-controls">
+                <label htmlFor={`image-upload-${props.object.id}`} className="upload-button">
+                  📁 Escolher Arquivo
                 </label>
                 <input
-                  id={`image-url-${props.object.id}`}
-                  type="url"
-                  value={data.imageUrl || ''}
-                  onChange={handleImageUrlChange}
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  className="url-input"
+                  id={`image-upload-${props.object.id}`}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
                 />
-              </div>
+                
+                <div className="url-input-group">
+                  <label htmlFor={`image-url-${props.object.id}`}>
+                    🔗 Ou inserir URL da imagem:
+                  </label>
+                  <input
+                    id={`image-url-${props.object.id}`}
+                    type="url"
+                    value={data.imageUrl || ''}
+                    onChange={handleImageUrlChange}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    className="url-input"
+                  />
+                </div>
 
-              <div className="alt-input-group">
-                <label htmlFor={`image-alt-${props.object.id}`}>
-                  ♿ Descrição para acessibilidade:
-                </label>
-                <input
-                  id={`image-alt-${props.object.id}`}
-                  type="text"
-                  value={data.imageAlt || ''}
-                  onChange={handleAltTextChange}
-                  placeholder="Descreva a imagem para leitores de tela"
-                  className="alt-input"
-                />
+                <div className="alt-input-group">
+                  <label htmlFor={`image-alt-${props.object.id}`}>
+                    ♿ Descrição para acessibilidade:
+                  </label>
+                  <input
+                    id={`image-alt-${props.object.id}`}
+                    type="text"
+                    value={data.imageAlt || ''}
+                    onChange={handleAltTextChange}
+                    placeholder="Descreva a imagem para leitores de tela"
+                    className="alt-input"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 

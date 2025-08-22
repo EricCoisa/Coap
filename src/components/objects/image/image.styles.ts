@@ -31,11 +31,51 @@ export const ImageContainer = styled.div`
     background: #f8f9fa;
     border: 2px dashed #dee2e6;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem;
     margin: 0.5rem 0;
     
     ${mediaQueries.mobile} {
-      padding: 1rem;
+      padding: 0.75rem;
+    }
+  }
+
+  /* Botão de colapso */
+  .collapse-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    width: 100%;
+    justify-content: center;
+    
+    &:hover {
+      color: #007acc;
+    }
+    
+    &:focus {
+      outline: 2px solid #007acc;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .arrow {
+      transition: transform 0.3s ease;
+      font-size: 0.75rem;
+      
+      &.collapsed {
+        transform: rotate(-90deg);
+      }
+      
+      &.expanded {
+        transform: rotate(0deg);
+      }
     }
   }
 
@@ -44,6 +84,7 @@ export const ImageContainer = styled.div`
     flex-direction: column;
     gap: 1rem;
     align-items: center;
+    padding-top: 1rem;
 
     /* Desktop: layout em linha para economizar espaço */
     @media (min-width: 769px) {
@@ -55,6 +96,7 @@ export const ImageContainer = styled.div`
 
     ${mediaQueries.mobile} {
       gap: 0.75rem;
+      padding-top: 0.75rem;
     }
   }
 

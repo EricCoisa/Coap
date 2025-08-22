@@ -199,6 +199,55 @@ export const RichTextContainer = styled.div<{ toolbarState: boolean }>`
   .hidden {
     display: none !important;
   }
+
+  /* Estilo para toolbar fixa no topo */
+  .ql-toolbar.fixed-toolbar {
+    position: fixed !important;
+    top: 60px !important; /* Assumindo altura do header de 60px */
+    z-index: 999 !important; /* Abaixo do header mas acima de outros elementos */
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #ccc !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(4px) !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 0 10px 10px !important;
+    /* Garantir que a toolbar seja visível */
+    display: block !important;
+    z-index: 10000 !important;
+    /* Animação suave */
+    transition: all 0.3s ease !important;
+
+    /* Seguir exatamente o layout do editor */
+    /* Desktop: 250px + gap de 0.5rem = 250px + 8px */
+    left: calc(250px + 4rem) !important;
+    right: 0 !important;
+    width: auto !important;
+
+    /* Tablet: 200px + gap de 0.25rem = 200px + 4px */
+    @media (max-width: 1200px) {
+      left: calc(200px + 0.8rem) !important;
+    }
+    
+    /* Mobile: sidebar colapsa, toolbar ocupa área do editor */
+    @media (max-width: 900px) {
+      left: 0 !important;
+      right: 0 !important;
+      top: 104px !important; /* Header + sidebar colapsada */
+      width: 100% !important;
+    }
+
+    /* Garantir que não ultrapasse os limites do container responsivo */
+    max-width: calc(1400px - 250px - 0.5rem) !important; /* Desktop */
+    
+    @media (max-width: 1200px) {
+      max-width: calc(100vw - 200px - 0.25rem) !important; /* Tablet */
+    }
+    
+    @media (max-width: 900px) {
+      max-width: 100vw !important; /* Mobile */
+    }
+  }
 `;
 
 export const RichTextViewer = styled.div`

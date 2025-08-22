@@ -12,7 +12,7 @@ import type { BaseComponentProps } from '../../../types';
 import type { RootStateBase } from '../../../store/rootReducer';
 import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
 import { SetCurrentQuill } from '../../../store/quill/actions/quillActions';
-import { registerQuill, unregisterQuill, generateQuillId } from '../../../utils/quillRegistry';
+import { registerQuill, unregisterQuill, generateQuillId, getQuillById } from '../../../utils/quillRegistry';
 
 // Tipos para configuração da toolbar do Quill
 
@@ -49,9 +49,13 @@ export type DefaultStyle = {
   [key: string]: unknown; // Para permitir outras propriedades do Quill
 };
 
+export interface SerializableDelta {
+    ops: unknown[]
+}
+
 export interface RichTextResponse{
     values: string;
-    delta: Delta
+    delta: Delta | SerializableDelta
 }
 
 export interface RichTextProps extends BaseComponentProps, PropsFromRedux<typeof connector> {
@@ -169,7 +173,7 @@ function RichText(props: RichTextProps) {
     // Usar toolbar apropriada baseada no tamanho da tela
     const isMobile = window.innerWidth <= 768;
     return isMobile ? mobileModules : modules;
-  }, [toolbar, toolbarState]);
+  }, [toolbar]);
   
   const quillFormats = useMemo(() => formats || defaultFormats, [formats]);
 
@@ -241,11 +245,18 @@ function RichText(props: RichTextProps) {
           console.log('Event text-change disparado!');
           if (quillInstance.current && !isUpdating.current) {
             const html = quillInstance.current.root.innerHTML;
+            const deltaContents = quillInstance.current.getContents();
             console.log('Texto alterado:', html);
             console.log('setValueRef.current:', setValueRef.current);
+            
+            // Converter Delta para objeto serializável
+            const serializableDelta = {
+              ops: deltaContents.ops ? JSON.parse(JSON.stringify(deltaContents.ops)) : []
+            };
+            
             setValueRef.current({
               values: html,
-              delta: quillInstance.current.getContents()
+              delta: serializableDelta
             });
           } else {
             console.log('Listener ignorado - isUpdating:', isUpdating.current, 'quillInstance:', !!quillInstance.current);
@@ -375,16 +386,50 @@ function RichText(props: RichTextProps) {
     }
   }, [value, mode, isQuillInitialized, props.defaultStyle]);
 
-
+  useEffect(() => {
     function handleToolBarMode() {
-      
+      if (props.toolbarState === false) {
+        // Quando toolbarState é false, ocultar todas as toolbars primeiro
+        const allQuillContainers = document.querySelectorAll('.ql-toolbar');
+        allQuillContainers.forEach(toolbar => {
+          const toolbarElement = toolbar as HTMLElement;
+          toolbarElement.classList.add('hidden');
+          toolbarElement.classList.remove('fixed-toolbar');
+        });
+
+        // Então mostrar apenas a toolbar do Quill ativo
+        if (props.currentQuillId) {
+          const activeQuill = getQuillById(props.currentQuillId);
+          if (activeQuill) {
+            const toolbarModule = activeQuill.getModule('toolbar');
+            if (toolbarModule && typeof toolbarModule === 'object' && 'container' in toolbarModule) {
+              const toolbarContainer = (toolbarModule as { container: HTMLElement }).container;
+              
+              // Remover classe hidden e adicionar classe para toolbar fixa
+              toolbarContainer.classList.remove('hidden');
+              toolbarContainer.classList.add('fixed-toolbar');
+              
+              console.log('Toolbar do Quill ativo fixada no topo:', props.currentQuillId);
+            }
+          }
+        }
+      } else {
+        // Quando toolbarState é true, remover estilos fixos e hidden de todas as toolbars
+        const allQuillContainers = document.querySelectorAll('.ql-toolbar');
+        allQuillContainers.forEach(toolbar => {
+          const toolbarElement = toolbar as HTMLElement;
+          
+          // Remover classes de controle
+          toolbarElement.classList.remove('hidden');
+          toolbarElement.classList.remove('fixed-toolbar');
+        });
+        
+        console.log('Todas as toolbars restauradas ao estado padrão');
+      }
     }
-  
-    useEffect(()=>{
-      handleToolBarMode();
-    },[props.currentQuillId, props.toolbarState])
 
-
+    handleToolBarMode();
+  }, [props.currentQuillId, props.toolbarState]);
   if (mode === 'view') {
     return (
       <RichTextContainer toolbarState={toolbarState} className="view-mode">
