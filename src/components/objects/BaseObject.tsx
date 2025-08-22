@@ -43,6 +43,25 @@ function BaseObject(props: BaseObjectProps) {
   // Verifica se deve mostrar as DropZones (drag normal ou modo de inserção)
   const shouldShowDropZones = showDropZones || (props.insertMode?.isActive && !isDragging);
 
+  // Função para verificar se deve mostrar o dropzone superior
+  function shouldShowTopDropZone() {
+    if (props.insertMode?.isActive) {
+      // No insertMode, sempre mostrar dropzone acima do primeiro elemento
+      return props.index === 0;
+    }
+    return shouldShowDropZones && !isDragging;
+  }
+
+  // Função para verificar se deve mostrar o dropzone inferior  
+  function shouldShowBottomDropZone() {
+    if (props.insertMode?.isActive) {
+      // No insertMode, sempre mostrar dropzone abaixo de todos os elementos
+      // Isso garante que haja sempre um dropzone entre elementos e após o último
+      return true;
+    }
+    return shouldShowDropZones && !isDragging;
+  }
+
   function handleRemove() {
     if (props.RemoveObject && props.object) {
       props.RemoveObject(props.object);
@@ -266,8 +285,8 @@ function BaseObject(props: BaseObjectProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
-      {/* DragSuperior - só aparece quando showDropZones é true */}
-      {shouldShowDropZones && !isDragging && (
+      {/* DragSuperior - só aparece quando shouldShowTopDropZone() é true */}
+      {shouldShowTopDropZone() && (
         <DropZoneTop
           onDragOver={handleTopZoneDragOver}
           onDrop={handleTopZoneDrop}
@@ -282,7 +301,7 @@ function BaseObject(props: BaseObjectProps) {
             <span>⬆️</span>
             <span>
               {props.insertMode?.isActive ? 
-                `Clique para adicionar ${props.insertMode.selectedObject?.label} aqui (acima)` : 
+                `Inserir ${props.insertMode.selectedObject?.label} aqui...` : 
                 'Soltar aqui (acima)'
               }
             </span>
@@ -296,7 +315,7 @@ function BaseObject(props: BaseObjectProps) {
         $isDragging={isDragging}
         $showDropZones={shouldShowDropZones || false}
       >
-        {props.mode === 'edit' && props.toolbar &&
+        {props.mode === 'edit'  &&
 
           <ActionButtonsContainer>
             {/* Ícone de mover/arrastar */}
@@ -329,8 +348,8 @@ function BaseObject(props: BaseObjectProps) {
         {props.children}
       </BaseObjectContainer>
 
-      {/* DragInferior - só aparece quando showDropZones é true */}
-      {shouldShowDropZones && !isDragging && (
+      {/* DragInferior - só aparece quando shouldShowBottomDropZone() é true */}
+      {shouldShowBottomDropZone() && (
         <DropZoneBottom
           onDragOver={handleBottomZoneDragOver}
           onDrop={handleBottomZoneDrop}
@@ -345,7 +364,7 @@ function BaseObject(props: BaseObjectProps) {
             <span>⬇️</span>
             <span>
               {props.insertMode?.isActive ? 
-                `Clique para adicionar ${props.insertMode.selectedObject?.label} aqui (abaixo)` : 
+                `Inserir ${props.insertMode.selectedObject?.label} aqui...` : 
                 'Soltar aqui (abaixo)'
               }
             </span>

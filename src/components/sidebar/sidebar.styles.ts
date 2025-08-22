@@ -5,7 +5,7 @@ export const Sidebar = styled.aside<{ $isMinimized?: boolean }>`
   background: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 1.5rem;
+
   height: fit-content;
   box-shadow: ${({ theme }) => theme.boxShadow};
   position: sticky;
