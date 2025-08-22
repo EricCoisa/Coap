@@ -79,19 +79,40 @@ function App(props: PropsFromRedux<typeof connector>) {
       const printWindow = window.open('', '', 'width=800,height=600');
       if (printWindow) {
         // Coletar todos os estilos do documento principal
-        const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
+        const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
         const stylesHtml = styles.map(style => style.outerHTML).join('\n');
+        // Coletar estilos do styled-components
+        const styledTags = Array.from(document.querySelectorAll('style[data-styled]'));
+        const styledHtml = styledTags.map(tag => tag.outerHTML).join('\n');
         printWindow.document.write(`
-          <html>
+          <!doctype html>
+          <html lang="en">
             <head>
+              <meta charset="UTF-8" />
+              <base href="/" />
               <title>Exportação do Conteúdo</title>
               ${stylesHtml}
+              ${styledHtml}
               <style>
                 body { font-family: Arial, sans-serif; margin: 0; padding: 24px; }
+                @media print {
+                  img, .main-image {
+                    max-width: 100% !important;
+                    max-height: 300px !important;
+                    height: auto !important;
+                    object-fit: contain !important;
+                    box-shadow: none !important;
+                    border-radius: 8px !important;
+                    display: block !important;
+                    margin: 0 auto !important;
+                  }
+                }
               </style>
             </head>
             <body>
-              ${previewArea.innerHTML}
+              <div id="preview-area">
+                ${previewArea.innerHTML}
+              </div>
             </body>
           </html>
         `);

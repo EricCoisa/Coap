@@ -1,6 +1,47 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
+  /* Regras globais para impressão: preview fiel */
+  @media print {
+    body {
+      background: #fff !important;
+      color: #000 !important;
+      box-shadow: none !important;
+    }
+    #preview-area {
+      background: #fff !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+    #preview-area > div {
+      page-break-after: always;
+      break-after: always;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      background: #fff !important;
+      padding: 0 !important;
+    }
+    #preview-area > div:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+    img, .main-image {
+      max-width: 90vw !important;
+      max-height: 400px !important;
+      width: auto !important;
+      height: auto !important;
+      box-shadow: none !important;
+      border-radius: 8px !important;
+      display: block !important;
+      margin: 0 auto !important;
+      object-fit: contain !important;
+    }
+    .ql-editor {
+      color: #000 !important;
+      background: #fff !important;
+    }
+  }
   * {
     margin: 0;
     padding: 0;
