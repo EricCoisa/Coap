@@ -214,7 +214,7 @@ export const RichTextContainer = styled.div<{ toolbarState: boolean }>`
     border-radius: 0 0 10px 10px !important;
     /* Garantir que a toolbar seja visível */
     display: block !important;
-    z-index: 10000 !important;
+    z-index: 1000 !important;
     /* Animação suave */
     transition: all 0.3s ease !important;
 

@@ -1,0 +1,272 @@
+[
+    {
+        "id": "page1-title",
+        "type": "title",
+        "label": "Título",
+        "icon": "📋",
+        "data": {
+            "content": {
+                "ops": [
+                    {
+                        "attributes": {
+                            "size": "large",
+                            "color": "#ff0000",
+                            "bold": true
+                        },
+                        "insert": "Introdução à Educação Gamificada"
+                    },
+                    {
+                        "attributes": {
+                            "align": "center"
+                        },
+                        "insert": "\n"
+                    }
+                ]
+            },
+            "fontSize": "24px",
+            "color": "#333333"
+        }
+    },
+    {
+        "id": "page1-text",
+        "type": "text",
+        "label": "Texto",
+        "icon": "📝",
+        "data": {
+            "content": {
+                "ops": [
+                    {
+                        "insert": "A educação gamificada é uma metodologia que aplica elementos de jogos no processo de aprendizagem, tornando-o mais dinâmico, envolvente e motivador.\n"
+                    },
+                    {
+                        "insert": "Em vez de se basear apenas em aulas tradicionais e conteúdos expositivos, a gamificação utiliza desafios, missões, recompensas e rankings para estimular a participação ativa dos estudantes.\n\n"
+                    },
+                    {
+                        "insert": "Os benefícios incluem:\n\n"
+                    },
+                    {
+                        "insert": "• Maior engajamento dos alunos;\n"
+                    },
+                    {
+                        "insert": "• Estímulo à colaboração e ao trabalho em equipe;\n"
+                    },
+                    {
+                        "insert": "• Aumento da motivação intrínseca (aprender por prazer);\n"
+                    },
+                    {
+                        "insert": "• Desenvolvimento de habilidades como foco, resiliência e resolução de problemas.\n\n"
+                    },
+                    {
+                        "insert": "👉 Assim, o aprendizado se torna uma jornada interativa em que o estudante é protagonista do próprio desenvolvimento.\n"
+                    }
+                ]
+            },
+            "fontSize": "16px",
+            "color": "#000000"
+        }
+    },
+    {
+        "id": "page1-image",
+        "type": "image",
+        "label": "Imagem",
+        "icon": "🖼️",
+        "data": {
+            "imageUrl": "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b",
+            "imageAlt": "🎮 Estudantes aprendendo com tablets, livros e elementos de game (níveis, conquistas).",
+            "title": {
+                "ops": [
+                    {
+                        "attributes": {
+                            "color": "#ff0000",
+                            "bold": true
+                        },
+                        "insert": "🎮 Estudantes aprendendo com tablets, livros e elementos de game"
+                    },
+                    {
+                        "attributes": {
+                            "align": "center"
+                        },
+                        "insert": "\n"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "id": "page2-title",
+        "type": "title",
+        "label": "Título",
+        "icon": "📋",
+        "data": {
+            "content": {
+                "ops": [
+                    {
+                        "attributes": {
+                            "size": "large",
+                            "color": "#ff0000",
+                            "bold": true
+                        },
+                        "insert": "Como Funciona a Gamificação na Educação"
+                    },
+                    {
+                        "attributes": {
+                            "align": "center"
+                        },
+                        "insert": "\n"
+                    }
+                ]
+            },
+            "fontSize": "24px",
+            "color": "#333333"
+        }
+    },
+    {
+        "id": "page2-text",
+        "type": "text",
+        "label": "Texto",
+        "icon": "📝",
+        "data": {
+            "content": {
+                "ops": [
+                    {
+                        "insert": "A aplicação da gamificação na sala de aula pode assumir diferentes formas, dependendo do objetivo do educador:\n\n"
+                    },
+                    {
+                        "insert": "• Missões e Desafios: conteúdos transformados em tarefas interativas;\n"
+                    },
+                    {
+                        "insert": "• Pontuação e Recompensas: alunos acumulam pontos ou medalhas ao completar atividades;\n"
+                    },
+                    {
+                        "insert": "• Níveis de Progressão: conteúdos organizados em fases, permitindo evolução gradual;\n"
+                    },
+                    {
+                        "insert": "• Ranking e Competição Saudável: promove engajamento e espírito de superação;\n"
+                    },
+                    {
+                        "insert": "• Narrativas Imersivas: storytelling transforma o aprendizado em uma aventura.\n\n"
+                    },
+                    {
+                        "insert": "Um exemplo prático: em uma aula de matemática, os estudantes podem resolver problemas para “libertar um personagem” preso em um enigma, ou em uma aula de história, desbloquear capítulos de uma narrativa conforme avançam no conteúdo.\n"
+                    }
+                ]
+            },
+            "fontSize": "16px",
+            "color": "#000000"
+        }
+    },
+    {
+        "id": "page2-image",
+        "type": "image",
+        "label": "Imagem",
+        "icon": "🖼️",
+        "data": {
+            "imageUrl": "https://images.unsplash.com/photo-1596495577886-d920f1fb7238",
+            "imageAlt": "🎲 Quadro digital com ranking e ícones de conquistas na sala de aula.",
+            "title": {
+                "ops": [
+                    {
+                        "attributes": {
+                            "color": "#ff0000",
+                            "bold": true
+                        },
+                        "insert": "🎲 Quadro digital com ranking e ícones de conquistas"
+                    },
+                    {
+                        "attributes": {
+                            "align": "center"
+                        },
+                        "insert": "\n"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "id": "page3-title",
+        "type": "title",
+        "label": "Título",
+        "icon": "📋",
+        "data": {
+            "content": {
+                "ops": [
+                    {
+                        "attributes": {
+                            "size": "large",
+                            "color": "#ff0000",
+                            "bold": true
+                        },
+                        "insert": "Impactos e Futuro da Educação Gamificada"
+                    },
+                    {
+                        "attributes": {
+                            "align": "center"
+                        },
+                        "insert": "\n"
+                    }
+                ]
+            },
+            "fontSize": "24px",
+            "color": "#333333"
+        }
+    },
+    {
+        "id": "page3-text",
+        "type": "text",
+        "label": "Texto",
+        "icon": "📝",
+        "data": {
+            "content": {
+                "ops": [
+                    {
+                        "insert": "A gamificação não substitui o ensino tradicional, mas o complementa, tornando o aprendizado mais atrativo. Diversos estudos apontam que alunos em ambientes gamificados apresentam:\n\n"
+                    },
+                    {
+                        "insert": "• Melhor retenção de conhecimento;\n"
+                    },
+                    {
+                        "insert": "• Maior persistência diante de dificuldades;\n"
+                    },
+                    {
+                        "insert": "• Desenvolvimento de habilidades socioemocionais.\n\n"
+                    },
+                    {
+                        "insert": "Com o avanço da tecnologia, novas ferramentas (realidade virtual, inteligência artificial e plataformas adaptativas) ampliam ainda mais as possibilidades da gamificação, criando experiências personalizadas e imersivas.\n\n"
+                    },
+                    {
+                        "insert": "👉 O futuro da educação caminha para ser cada vez mais interativo, divertido e centrado no aluno, formando não apenas aprendizes mais engajados, mas também cidadãos criativos e preparados para os desafios do mundo moderno.\n"
+                    }
+                ]
+            },
+            "fontSize": "16px",
+            "color": "#000000"
+        }
+    },
+    {
+        "id": "page3-image",
+        "type": "image",
+        "label": "Imagem",
+        "icon": "🖼️",
+        "data": {
+            "imageUrl": "https://images.unsplash.com/photo-1555255707-c07966088b7b",
+            "imageAlt": "🕹️ Estudantes usando óculos de realidade virtual em uma sala interativa.",
+            "title": {
+                "ops": [
+                    {
+                        "attributes": {
+                            "color": "#ff0000",
+                            "bold": true
+                        },
+                        "insert": "🕹️ Estudantes usando óculos de realidade virtual"
+                    },
+                    {
+                        "attributes": {
+                            "align": "center"
+                        },
+                        "insert": "\n"
+                    }
+                ]
+            }
+        }
+    }
+]

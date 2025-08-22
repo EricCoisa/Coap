@@ -80,7 +80,7 @@ function SidebarComponent(props: SidebarProps) {
       </Sidebar>
 
       <MinimizeButton onClick={toggleMinimize} $toolbar={props.toolbar} $currentQuill={props.currentQuillId != null} $isMinimized={isMinimized}>
-        {isMinimized ? '▼ Expandir' : '▲ Recolher'}
+        {isMinimized ? '▼ Ferramentas' : '▲ Recolher'}
       </MinimizeButton>
     </>
   );

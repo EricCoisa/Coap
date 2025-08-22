@@ -1,5 +1,5 @@
 
-import { CURRENTLANGUAGE_SET, LOWPERFORMANCE_SET, OBJECTSLIST_SET as OBJECTSLIST_SET, OBJECTSUSED_ADD, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, OBJECTSUSED_EDIT, type ApplicationState, type ApplicationTypes, VIEWMODE_SET, TOOLBAR_SET, INSERT_MODE_SET, MOVE_MODE_SET } from '../../../types/application';
+import { CURRENTLANGUAGE_SET, LOWPERFORMANCE_SET, OBJECTSLIST_SET, OBJECTSUSED_ADD, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, OBJECTSUSED_EDIT, type ApplicationState, type ApplicationTypes, VIEWMODE_SET, TOOLBAR_SET, INSERT_MODE_SET, MOVE_MODE_SET, OBJECTSUSED_SET } from '../../../types/application';
 import { InitialObjects, type AnyObject } from '../../../types/objects';
 
 const INITIAL_STATE: ApplicationState = {
@@ -123,6 +123,9 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
                     obj.id === id ? { ...obj, data:data } : obj
                 )
             };
+        }
+        case OBJECTSUSED_SET: {
+            return { ...state, ObjectsUsed: action.payload };
         }
         case TOOLBAR_SET:
             return { ...state, toolbar: action.payload };

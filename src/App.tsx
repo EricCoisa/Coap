@@ -1,3 +1,4 @@
+import FirstTimeModal from './components/modals/firstTimeModal/firstTimeModal';
 import { ThemeProvider } from 'styled-components'
 import { defaultTheme } from './themes/defaultTheme'
 import { GlobalStyles } from './styles/GlobalStyles'
@@ -10,23 +11,63 @@ import { SidebarProvider } from './contexts/SidebarContext'
 import type { ViewMode } from './types'
 import { connectUtil, type PropsFromRedux } from './utils/reduxUtil';
 import type { RootStateBase } from './store/rootReducer';
-import { SetViewMode } from './store/application/actions/applicationAction';
+import { Limpar, LoadFirstTime, LoadObjects, Save, SetViewMode } from './store/application/actions/applicationAction';
+import { useEffect, useState } from 'react'
+import Modal from './components/modal/modal'
+import ImportModal from './components/modals/importModal/importModal';
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
     viewMode: _state.ApplicationReducer.viewMode ?? 'editor',
+    objectused: _state.ApplicationReducer.ObjectsUsed,
   }),
-  { SetViewMode }
+  { SetViewMode, LoadObjects }
 );
 
 function App(props: PropsFromRedux<typeof connector>) {
+    const { objectused } = props;
+    const [firstTime, setFirstTime] = useState(false);
+    const [importModal, setImportModal] = useState(false);
+
+    function handleCloseModal() {
+      setFirstTime(false);
+    }
+
+  useEffect(() => {
+    props.LoadObjects();
+    setFirstTime(LoadFirstTime())
+  }, []);
+
+  function handleLoadTemplate(){
+    fetch('/template.json')
+      .then(res => res.json())
+      .then(json => {
+        props.LoadObjects(json);
+      })
+      .catch(() => {
+        alert('Erro ao carregar template de exemplo!');
+      });
+    handleCloseModal();
+  }
+
+  useEffect(() => {
+    if (typeof Save === 'function' && Array.isArray(objectused)) {
+      try {
+        Save();
+      } catch (err) {
+        console.error("error", err)
+      }
+    }
+  }, [objectused, Save]);
+
+
   function handleModeChange(mode: ViewMode) {
     props.SetViewMode(mode);
   }
 
-  function handleSave() {
-    console.log('Salvando conteúdo...')
-    // TODO: Implementar lógica de salvamento
+  function handleReset() {
+    Limpar()
+    props.LoadObjects([])
   }
 
   function handleExport() {
@@ -63,7 +104,13 @@ function App(props: PropsFromRedux<typeof connector>) {
   }
 
   function handleImport() {
+    setImportModal(true)
     console.log('Importando conteúdo...')
+    // TODO: Implementar lógica de importação
+  }
+
+    function handleCloseImportModal() {
+    setImportModal(false)
     // TODO: Implementar lógica de importação
   }
 
@@ -76,7 +123,7 @@ function App(props: PropsFromRedux<typeof connector>) {
         <Header
           currentMode={props.viewMode}
           onModeChange={handleModeChange}
-          onSave={handleSave}
+          onReset={handleReset}
           onExport={handleExport}
           onImport={handleImport}
         />
@@ -85,6 +132,14 @@ function App(props: PropsFromRedux<typeof connector>) {
         ) : (
           <Preview />
         )}
+   
+            <Modal size='lg' onClose={handleCloseModal} isOpen={firstTime}>
+              <FirstTimeModal onAccept={handleLoadTemplate} onDeny={handleCloseModal} />
+            </Modal>
+
+            <Modal size='lg' onClose={handleCloseImportModal} isOpen={importModal}>
+              <ImportModal onClose={handleCloseImportModal}></ImportModal>
+            </Modal>
       </SidebarProvider>
     </ThemeProvider>
   )

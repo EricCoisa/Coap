@@ -2,6 +2,7 @@ export const LOWPERFORMANCE_SET = 'LOWPERFORMANCE_SET';
 export const CURRENTLANGUAGE_SET = 'CURRENTLANGUAGE_SET';
 export const OBJECTSLIST_SET = 'OBJECTSLIST_SET';
 
+export const OBJECTSUSED_SET = 'OBJECTSUSED_SET';
 export const OBJECTSUSED_ADD = 'OBJECTSUSED_ADD';
 export const OBJECTSUSED_REMOVE = 'OBJECTSUSED_REMOVE';
 export const OBJECTSUSED_MOVE = 'OBJECTSUSED_MOVE';
@@ -39,6 +40,11 @@ export interface ApplicationViewModeAction {
 
 export interface ApplicationObjectsListAction {
     type: typeof OBJECTSLIST_SET;
+    payload: AnyObject[];
+}
+
+export interface ApplicationObjectsUsedSetAction {
+    type: typeof OBJECTSUSED_SET;
     payload: AnyObject[];
 }
 
@@ -102,4 +108,4 @@ export interface ApplicationMoveModeAction {
     };
 }
 
-export type ApplicationTypes = ApplicationLanguageAction | ApplicationLowPerformanceAction | ApplicationObjectsListAction | ApplicationObjectsUsedAddAction | ApplicationObjectsUsedRemoveAction | ApplicationObjectsUsedMoveAction | ApplicationObjectsUsedEditAction | ApplicationViewModeAction | ApplicationToolbarAction | ApplicationInsertModeAction | ApplicationMoveModeAction;
+export type ApplicationTypes = ApplicationObjectsUsedSetAction | ApplicationLanguageAction | ApplicationLowPerformanceAction | ApplicationObjectsListAction | ApplicationObjectsUsedAddAction | ApplicationObjectsUsedRemoveAction | ApplicationObjectsUsedMoveAction | ApplicationObjectsUsedEditAction | ApplicationViewModeAction | ApplicationToolbarAction | ApplicationInsertModeAction | ApplicationMoveModeAction;

@@ -1,4 +1,3 @@
-import type { RootStateBase } from '../../store/rootReducer';
 import type { ViewMode } from '../../types';
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
 import { 
@@ -13,7 +12,7 @@ import {
 
 
 const connector = connectUtil(
-  (_state: RootStateBase) => ({
+  () => ({
   }),
   { }
 );
@@ -21,7 +20,7 @@ const connector = connectUtil(
 export interface HeaderProps extends PropsFromRedux<typeof connector> {
   currentMode: ViewMode;
   onModeChange: (mode: ViewMode) => void;
-  onSave?: () => void;
+  onReset?: () => void;
   onExport?: () => void;
   onImport?: () => void;
   className?: string;
@@ -61,9 +60,14 @@ function Header(props : HeaderProps) {
         </Navigation>
 
         <Actions>
-          {props.currentMode === 'editor' && props.onSave && (
-            <ActionButton onClick={props.onSave}>
-              Salvar
+          {props.currentMode === 'editor' && props.onReset && (
+            <ActionButton onClick={props.onReset}>
+              Reset
+            </ActionButton>
+          )}
+          {props.currentMode === 'editor' && props.onImport && (
+            <ActionButton onClick={props.onImport}>
+              Import
             </ActionButton>
           )}
           {props.currentMode === 'preview' && props.onExport && (

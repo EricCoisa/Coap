@@ -96,26 +96,25 @@ export const SidebarSectionToggle = styled.button`
 
 export const SidebarSectionContent = styled.div<{ $isCollapsed: boolean }>`
   padding: ${({ $isCollapsed }) => $isCollapsed ? '0' : '1rem'};
-  max-height: ${({ $isCollapsed }) => $isCollapsed ? '0' : '1000px'};
-  overflow: hidden;
+  max-height: ${({ $isCollapsed }) => $isCollapsed ? '0' : '40vh'};
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: all 0.3s ease;
   opacity: ${({ $isCollapsed }) => $isCollapsed ? '0' : '1'};
 
   ${mediaQueries.mobile} {
     padding: ${({ $isCollapsed }) => $isCollapsed ? '0' : '0.75rem'};
+    max-height: ${({ $isCollapsed }) => $isCollapsed ? '0' : '30vh'};
+    overflow-y: auto;
   }
 
   ${mediaQueries.sidebarCollapse} {
     /* Conteúdo mais compacto e otimizado para mobile */
     padding: ${({ $isCollapsed }) => $isCollapsed ? '0' : '0.5rem'};
-    max-height: ${({ $isCollapsed }) => $isCollapsed ? '0' : '300px'};
-    
-    /* Layout vertical para melhor uso do espaço */
+    max-height: ${({ $isCollapsed }) => $isCollapsed ? '0' : '25vh'};
     display: ${({ $isCollapsed }) => $isCollapsed ? 'none' : 'flex'};
     flex-direction: column;
     gap: 0.5rem;
-    
-    /* Scrollbar customizada para mobile */
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: ${({ theme }) => theme.colors.border} transparent;

@@ -74,7 +74,7 @@ function DragObject(props: BaseObjectProps) {
   }
 
   // Verifica se deve mostrar as DropZones (drag normal, modo de inserção ou modo de movimento)
-  const shouldShowDropZones = showDropZones || 
+  const shouldShowDropZones = showDropZones ||
     (props.insertMode?.isActive && !isDragging) ||
     // No mobile, se moveMode está ativo e não é o próprio objeto, mostrar zonas automaticamente
     (isMobile() && props.moveMode?.isActive && props.moveMode.selectedObjectId !== props.object.id) ||
@@ -308,8 +308,8 @@ function DragObject(props: BaseObjectProps) {
       props.SetInsertMode(false); // Desativa o modo de inserção
     }
     // Modo de movimento - no mobile sempre funciona, no desktop só quando zonas estão visíveis
-    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && 
-             (isMobile() || shouldShowDropZones)) {
+    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode &&
+      (isMobile() || shouldShowDropZones)) {
       const draggedObject = props.objectsUsed.find(obj => obj.id === props.moveMode?.selectedObjectId);
       if (draggedObject) {
         const newIndex = props.index; // Mover para acima
@@ -374,8 +374,8 @@ function DragObject(props: BaseObjectProps) {
       props.SetInsertMode(false); // Desativa o modo de inserção
     }
     // Modo de movimento - no mobile sempre funciona, no desktop só quando zonas estão visíveis
-    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && 
-             (isMobile() || shouldShowDropZones)) {
+    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode &&
+      (isMobile() || shouldShowDropZones)) {
       const draggedObject = props.objectsUsed.find(obj => obj.id === props.moveMode?.selectedObjectId);
       if (draggedObject) {
         const newIndex = props.index + 1; // Mover para abaixo
@@ -424,27 +424,28 @@ function DragObject(props: BaseObjectProps) {
         </DropZoneTop>
       )}
       <ActionButtonsContainer $isTimeLine={props.isTimeLine} >
-        <DragIcon
-          draggable
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onMouseEnter={handleDragIconMouseEnter}
-          onMouseLeave={handleDragIconMouseLeave}
-          onMouseDown={handleDragIconMouseDown}
-          onMouseUp={handleDragIconMouseUp}
-          onClick={handleDragIconClick}
-          title={props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id ? 
-            "Clique nas zonas de drop para mover" : 
-            "Arrastar para mover ou clique para ativar modo de movimento"
-          }
-          style={{
-            backgroundColor: props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id ? 
-              '#28a745' : undefined
-          }}
-        >
-          <span>⋮⋮</span>
-        </DragIcon>
-
+        {props.mode === 'editor' &&
+          <DragIcon
+            draggable
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onMouseEnter={handleDragIconMouseEnter}
+            onMouseLeave={handleDragIconMouseLeave}
+            onMouseDown={handleDragIconMouseDown}
+            onMouseUp={handleDragIconMouseUp}
+            onClick={handleDragIconClick}
+            title={props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id ?
+              "Clique nas zonas de drop para mover" :
+              "Arrastar para mover ou clique para ativar modo de movimento"
+            }
+            style={{
+              backgroundColor: props.moveMode?.isActive && props.moveMode.selectedObjectId === props.object.id ?
+                '#28a745' : undefined
+            }}
+          >
+            <span>⋮⋮</span>
+          </DragIcon>
+        }
       </ActionButtonsContainer>
 
       {props.children}

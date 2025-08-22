@@ -1,9 +1,82 @@
 import type { AppThunk } from "../../../utils/reduxUtil";
 import i18n from '../../../i18n';
-import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, TOOLBAR_SET, VIEWMODE_SET, INSERT_MODE_SET, MOVE_MODE_SET } from "../../../types/application";
+import { CURRENTLANGUAGE_SET, OBJECTSUSED_ADD, OBJECTSUSED_EDIT, OBJECTSUSED_MOVE, OBJECTSUSED_REMOVE, TOOLBAR_SET, VIEWMODE_SET, INSERT_MODE_SET, MOVE_MODE_SET, OBJECTSUSED_SET } from "../../../types/application";
 import type { AnyObject } from "../../../types/objects";
+import Store from '../../../store/store';
 import type { ViewMode } from '../../../types';
 
+export function Save() {
+    try {
+        const state = Store.getState();
+        console.log("state", state)
+        const objectsUsed = state?.ApplicationReducer?.ObjectsUsed ?? [];
+        console.log("Saving objectsUsed", objectsUsed);
+
+            localStorage.setItem('ObjectsUsed', JSON.stringify(objectsUsed));
+        
+    } catch {
+        // Silencioso para evitar erros
+    }
+}
+
+export function Limpar() {
+    try {
+        localStorage.removeItem('ObjectsUsed');
+        localStorage.removeItem('FirstTime');
+    } catch {
+        // Silencioso para evitar erros
+    }
+}
+
+export function Load() : AnyObject[] {
+    try {
+        const data = localStorage.getItem('ObjectsUsed');
+
+        if (data) {
+            return JSON.parse(data);
+        }
+    } catch {
+        // Silencioso
+    }
+    return [];
+}
+
+function SetFirstTime() {
+    try {
+        localStorage.setItem('FirstTime', "true");
+    } catch {
+        // Silencioso para evitar erros
+    }
+}
+
+export function LoadFirstTime() : boolean {
+    try {
+        const data = localStorage.getItem('FirstTime');
+        console.log("FirstTime", data);
+        if (data === 'true') {
+            return false;
+        }
+    } catch {
+        // Silencioso
+    }
+    SetFirstTime();
+    return true;
+}
+
+
+
+export function LoadObjects(objects? : AnyObject[] | undefined): AppThunk {
+    return async function dispatchLoadObjects(dispatch) {
+        
+        const saved = objects ?? Load()
+        if(saved != null){
+            dispatch({
+                payload: saved,
+                type: OBJECTSUSED_SET
+            });
+        }
+    };
+}
 
 export function SetCurrentLanguage(language: string): AppThunk {
     return async function dispatchSetCurrentLanguage(dispatch) {
