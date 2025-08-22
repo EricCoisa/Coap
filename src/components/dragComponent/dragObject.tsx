@@ -6,6 +6,14 @@ import type { AnyObject } from '../../types/objects/index';
 
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
 import { globalDragState } from '../../utils/dragState';
+
+// Estado global para controlar qual elemento tem zonas ativas no modo de movimento
+const globalMoveState = {
+  activeElementId: null as string | null,
+  setActiveElement: (elementId: string | null) => {
+    globalMoveState.activeElementId = elementId;
+  }
+};
 import {
   DragIcon,
   DropZoneTop,
@@ -46,17 +54,32 @@ function DragObject(props: BaseObjectProps) {
     if (!props.moveMode?.isActive) {
       setShowDropZones(false);
       setActiveDropZone(null);
+      // Limpa o estado global
+      globalMoveState.setActiveElement(null);
     }
     // Se mudou o objeto selecionado, limpa as zonas
     else if (props.moveMode?.selectedObjectId !== props.object.id) {
       setShowDropZones(false);
       setActiveDropZone(null);
+      // Se este elemento era o ativo, limpa
+      if (globalMoveState.activeElementId === props.object.id) {
+        globalMoveState.setActiveElement(null);
+      }
     }
   }, [props.moveMode?.isActive, props.moveMode?.selectedObjectId, props.object.id]);
 
+  // Função para detectar se é dispositivo mobile
+  function isMobile() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  }
+
   // Verifica se deve mostrar as DropZones (drag normal, modo de inserção ou modo de movimento)
   const shouldShowDropZones = showDropZones || 
-    (props.insertMode?.isActive && !isDragging);
+    (props.insertMode?.isActive && !isDragging) ||
+    // No mobile, se moveMode está ativo e não é o próprio objeto, mostrar zonas automaticamente
+    (isMobile() && props.moveMode?.isActive && props.moveMode.selectedObjectId !== props.object.id) ||
+    // No modo de movimento, só mostrar se este elemento é o ativo globalmente
+    (props.moveMode?.isActive && globalMoveState.activeElementId === props.object.id);
 
   // Função para verificar se deve mostrar o dropzone superior
   function shouldShowTopDropZone() {
@@ -192,7 +215,10 @@ function DragObject(props: BaseObjectProps) {
   // Detecta quando o mouse entra no elemento durante modo de movimento
   function handleMouseEnter() {
     // Se está no modo de movimento e não é o próprio objeto sendo movido
-    if (props.moveMode?.isActive && props.moveMode.selectedObjectId !== props.object.id) {
+    // E não é mobile (no mobile as zonas já aparecem automaticamente)
+    if (!isMobile() && props.moveMode?.isActive && props.moveMode.selectedObjectId !== props.object.id) {
+      // Define este elemento como o único ativo
+      globalMoveState.setActiveElement(props.object.id);
       setShowDropZones(true);
     }
   }
@@ -200,7 +226,8 @@ function DragObject(props: BaseObjectProps) {
   // Remove as zonas quando o mouse sai do elemento durante modo de movimento
   function handleMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
     // Se está no modo de movimento, esconde as drop zones
-    if (props.moveMode?.isActive) {
+    // Mas só no desktop (no mobile as zonas ficam sempre visíveis)
+    if (!isMobile() && props.moveMode?.isActive) {
       // Verifica se realmente saiu do container (similar à lógica do drag)
       const rect = e.currentTarget.getBoundingClientRect();
       const x = e.clientX;
@@ -208,6 +235,10 @@ function DragObject(props: BaseObjectProps) {
 
       // Só remove as drop zones se o mouse realmente saiu da área do container
       if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        // Limpa o elemento ativo se este era o ativo
+        if (globalMoveState.activeElementId === props.object.id) {
+          globalMoveState.setActiveElement(null);
+        }
         setShowDropZones(false);
         setActiveDropZone(null);
       }
@@ -276,8 +307,9 @@ function DragObject(props: BaseObjectProps) {
       props.AddObject(newObject, insertIndex);
       props.SetInsertMode(false); // Desativa o modo de inserção
     }
-    // Modo de movimento - só funciona se as zonas estão visíveis (quando o mouse está sobre o elemento)
-    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && shouldShowDropZones) {
+    // Modo de movimento - no mobile sempre funciona, no desktop só quando zonas estão visíveis
+    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && 
+             (isMobile() || shouldShowDropZones)) {
       const draggedObject = props.objectsUsed.find(obj => obj.id === props.moveMode?.selectedObjectId);
       if (draggedObject) {
         const newIndex = props.index; // Mover para acima
@@ -286,6 +318,8 @@ function DragObject(props: BaseObjectProps) {
         // Força a limpeza das zonas após o movimento
         setShowDropZones(false);
         setActiveDropZone(null);
+        // Limpa o estado global
+        globalMoveState.setActiveElement(null);
       }
     }
   }
@@ -339,8 +373,9 @@ function DragObject(props: BaseObjectProps) {
       props.AddObject(newObject, insertIndex);
       props.SetInsertMode(false); // Desativa o modo de inserção
     }
-    // Modo de movimento - só funciona se as zonas estão visíveis (quando o mouse está sobre o elemento)
-    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && shouldShowDropZones) {
+    // Modo de movimento - no mobile sempre funciona, no desktop só quando zonas estão visíveis
+    else if (props.moveMode?.isActive && props.moveMode.selectedObjectId && props.MoveObject && props.SetMoveMode && 
+             (isMobile() || shouldShowDropZones)) {
       const draggedObject = props.objectsUsed.find(obj => obj.id === props.moveMode?.selectedObjectId);
       if (draggedObject) {
         const newIndex = props.index + 1; // Mover para abaixo
@@ -349,6 +384,8 @@ function DragObject(props: BaseObjectProps) {
         // Força a limpeza das zonas após o movimento
         setShowDropZones(false);
         setActiveDropZone(null);
+        // Limpa o estado global
+        globalMoveState.setActiveElement(null);
       }
     }
   }
@@ -367,11 +404,11 @@ function DragObject(props: BaseObjectProps) {
         <DropZoneTop
           onDragOver={handleTopZoneDragOver}
           onDrop={handleTopZoneDrop}
-          onClick={(props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? handleTopZoneClick : undefined}
+          onClick={(props.insertMode?.isActive || (props.moveMode?.isActive && (isMobile() || shouldShowDropZones))) ? handleTopZoneClick : undefined}
           activeDropZone={activeDropZone}
           style={{
-            cursor: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 'pointer' : 'default',
-            zIndex: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 1000 : 'auto'
+            cursor: (props.insertMode?.isActive || (props.moveMode?.isActive && (isMobile() || shouldShowDropZones))) ? 'pointer' : 'default',
+            zIndex: (props.insertMode?.isActive || (props.moveMode?.isActive && (isMobile() || shouldShowDropZones))) ? 1000 : 'auto'
           }}
         >
           <DropZoneContent $isTimeLine={props.isTimeLine}>
@@ -379,7 +416,7 @@ function DragObject(props: BaseObjectProps) {
             <span>
               {props.insertMode?.isActive ?
                 `Inserir ${props.insertMode.selectedObject?.label} aqui...` :
-                (props.moveMode?.isActive && shouldShowDropZones) ? 'Mover para cima' : 'Soltar aqui (acima)'
+                (props.moveMode?.isActive && (isMobile() || shouldShowDropZones)) ? 'Mover para cima' : 'Soltar aqui (acima)'
               }
             </span>
             <span>⬆️</span>
@@ -417,11 +454,11 @@ function DragObject(props: BaseObjectProps) {
         <DropZoneBottom
           onDragOver={handleBottomZoneDragOver}
           onDrop={handleBottomZoneDrop}
-          onClick={(props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? handleBottomZoneClick : undefined}
+          onClick={(props.insertMode?.isActive || (props.moveMode?.isActive && (isMobile() || shouldShowDropZones))) ? handleBottomZoneClick : undefined}
           activeDropZone={activeDropZone}
           style={{
-            cursor: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 'pointer' : 'default',
-            zIndex: (props.insertMode?.isActive || (props.moveMode?.isActive && shouldShowDropZones)) ? 1000 : 'auto'
+            cursor: (props.insertMode?.isActive || (props.moveMode?.isActive && (isMobile() || shouldShowDropZones))) ? 'pointer' : 'default',
+            zIndex: (props.insertMode?.isActive || (props.moveMode?.isActive && (isMobile() || shouldShowDropZones))) ? 1000 : 'auto'
           }}
         >
           <DropZoneContent $isTimeLine={props.isTimeLine}>
@@ -429,7 +466,7 @@ function DragObject(props: BaseObjectProps) {
             <span>
               {props.insertMode?.isActive ?
                 `Inserir ${props.insertMode.selectedObject?.label} aqui...` :
-                (props.moveMode?.isActive && shouldShowDropZones) ? 'Mover para baixo' : 'Soltar aqui (abaixo)'
+                (props.moveMode?.isActive && (isMobile() || shouldShowDropZones)) ? 'Mover para baixo' : 'Soltar aqui (abaixo)'
               }
             </span>
             <span>⬇️</span>

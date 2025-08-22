@@ -5,6 +5,7 @@ import Header from './components/header/header'
 import Editor from './views/editor/editor'
 import Preview from './views/preview/preview'
 import InsertModeIndicator from './components/InsertModeIndicator'
+import MoveModeIndicator from './components/MoveModeIndicator'
 import { SidebarProvider } from './contexts/SidebarContext'
 import type { ViewMode } from './types'
 import { connectUtil, type PropsFromRedux } from './utils/reduxUtil';
@@ -71,6 +72,7 @@ function App(props: PropsFromRedux<typeof connector>) {
       <GlobalStyles />
       <SidebarProvider>
         <InsertModeIndicator />
+        <MoveModeIndicator />
         <Header
           currentMode={props.viewMode}
           onModeChange={handleModeChange}
