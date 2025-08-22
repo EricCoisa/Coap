@@ -1,6 +1,6 @@
 import type { BaseComponentProps } from '../../types';
 import { connectUtil, type PropsFromRedux } from '../../utils/reduxUtil';
-import { Sidebar, MinimizeButton } from './sidebar.styles';
+import { Sidebar, MinimizeButton, SidebarOverlay } from './sidebar.styles';
 import { useSidebar } from '../../hooks/useSidebar';
 import TimeLine from './components/timeline/timeline';
 import Tools from './components/tools/tools';
@@ -25,20 +25,27 @@ function SidebarComponent(props: SidebarProps) {
     setIsMinimized(!isMinimized);
   }
 
+  function handleOverlayClick() {
+    setIsMinimized(true);
+  }
+
   return (
-    <Sidebar className={props.className} style={props.style} $isMinimized={isMinimized}>
-      <SidebarSection title="Objetos" collapsible={true}>
+    <>
+      <SidebarOverlay $isVisible={!isMinimized} onClick={handleOverlayClick} />
+      <Sidebar className={props.className} style={props.style} $isMinimized={isMinimized}>
+        <SidebarSection title="Objetos" collapsible={true}>
+          <Tools isMinimized={isMinimized} />
+        </SidebarSection>
 
-        <Tools isMinimized={isMinimized} />
-      </SidebarSection>
-
-      <SidebarSection title="Timeline" collapsible={true}>
-        <TimeLine isMinimized={isMinimized} />
-      </SidebarSection>
-      <MinimizeButton onClick={toggleMinimize}>
-        {isMinimized ? '▼' : '▲'}
+        <SidebarSection title="Timeline" collapsible={true}>
+          <TimeLine isMinimized={isMinimized} />
+        </SidebarSection>
+      </Sidebar>
+      
+      <MinimizeButton onClick={toggleMinimize} $isMinimized={isMinimized}>
+        {isMinimized ? '▼ Expandir' : '▲ Recolher'}
       </MinimizeButton>
-    </Sidebar>
+    </>
   );
 }
 

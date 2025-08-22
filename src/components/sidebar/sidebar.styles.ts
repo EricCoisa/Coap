@@ -16,36 +16,105 @@ export const Sidebar = styled.aside<{ $isMinimized?: boolean }>`
 
   ${mediaQueries.sidebarCollapse} {
     position: fixed;
-    top: 64px;
+    top: ${({ $isMinimized }) => $isMinimized ? '-70vh' : '0'};
+    bottom: auto;
     left: 0;
     right: 0;
     margin: 0;
     border-radius: 0;
     border-left: none;
     border-right: none;
-    padding: ${({ $isMinimized }) => $isMinimized ? '0.75rem 1.5rem' : '1.5rem'};
-    max-height: ${({ $isMinimized }) => $isMinimized ? '60px' : '40vh'};
+    border-top: none;
+    padding: ${({ $isMinimized }) => $isMinimized ? '0' : '1rem'};
+    max-height: ${({ $isMinimized }) => $isMinimized ? '0' : '70vh'};
+    height: ${({ $isMinimized }) => $isMinimized ? '0' : 'auto'};
     z-index: ${({ theme }) => theme.zIndex.sidebar};
     transition: all 0.3s ease;
+    overflow: ${({ $isMinimized }) => $isMinimized ? 'hidden' : 'auto'};
+    
+    /* Layout vertical para mobile */
+    display: flex;
+    flex-direction: column;
+    gap: ${({ $isMinimized }) => $isMinimized ? '0' : '1rem'};
+    
+    /* Melhora a aparência quando expandido */
+    ${({ $isMinimized }) => !$isMinimized && `
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      border-bottom: 2px solid;
+      border-image: linear-gradient(90deg, transparent, rgba(0, 122, 204, 0.3), transparent) 1;
+    `}
   }
 `;
 
-export const MinimizeButton = styled.button`
+/* Overlay para melhor UX no mobile quando sidebar estiver aberto */
+export const SidebarOverlay = styled.div<{ $isVisible: boolean }>`
   display: none;
-  background: none;
-  border: none;
+  
+  ${mediaQueries.sidebarCollapse} {
+    display: ${({ $isVisible }) => $isVisible ? 'block' : 'none'};
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: ${({ theme }) => theme.zIndex.sidebar - 1};
+    backdrop-filter: blur(2px);
+    transition: all 0.3s ease;
+    opacity: ${({ $isVisible }) => $isVisible ? '1' : '0'};
+    pointer-events: ${({ $isVisible }) => $isVisible ? 'auto' : 'none'};
+  }
+`;
+
+export const MinimizeButton = styled.button<{ $isMinimized?: boolean }>`
+  display: none;
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-top: none;
   color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
-  padding: 0.5rem;
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  padding: 0.75rem 1rem;
+  border-radius: 0 0 ${({ theme }) => theme.borderRadius.sm} ${({ theme }) => theme.borderRadius.sm};
   transition: all ${({ theme }) => theme.transitions.normal};
+  box-shadow: ${({ theme }) => theme.boxShadow};
+  font-size: 1rem;
+  font-weight: 500;
   
   &:hover {
     background: ${({ theme }) => theme.colors.objectBackground};
+    transform: translateY(2px);
+  }
+
+  &:focus {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
   }
 
   ${mediaQueries.sidebarCollapse} {
     display: block;
+    position: fixed;
+    top: ${({ $isMinimized }) => $isMinimized ? '0' : '70vh'};
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: ${({ theme }) => theme.zIndex.sidebar + 1};
+    min-width: 120px;
+    
+    ${({ $isMinimized, theme }) => $isMinimized && `
+      border-radius: 0 0 ${theme.borderRadius.sm} ${theme.borderRadius.sm};
+      border-top: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: pulse 2s infinite;
+    `}
+  }
+
+  @keyframes pulse {
+    0%, 100% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+    }
+    50% { 
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); 
+    }
   }
 `;
 
