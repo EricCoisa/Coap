@@ -66,7 +66,7 @@ export const SidebarOverlay = styled.div<{ $isVisible: boolean }>`
   }
 `;
 
-export const MinimizeButton = styled.button<{ $isMinimized?: boolean }>`
+export const MinimizeButton = styled.button<{ $isMinimized?: boolean; $toolbar?: boolean; $currentQuill?: boolean }>`
   display: none;
   background: ${({ theme }) => theme.colors.surface};
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -80,10 +80,7 @@ export const MinimizeButton = styled.button<{ $isMinimized?: boolean }>`
   font-size: 1rem;
   font-weight: 500;
   
-  &:hover {
-    background: ${({ theme }) => theme.colors.objectBackground};
-    transform: translateY(2px);
-  }
+
 
   &:focus {
     outline: 2px solid ${({ theme }) => theme.colors.primary};
@@ -93,18 +90,28 @@ export const MinimizeButton = styled.button<{ $isMinimized?: boolean }>`
   ${mediaQueries.sidebarCollapse} {
     display: block;
     position: fixed;
-    top: ${({ $isMinimized }) => $isMinimized ? '0' : '70vh'};
-    bottom: auto;
     left: 50%;
     transform: translateX(-50%);
-    z-index: ${({ theme }) => theme.zIndex.sidebar + 1};
-    min-width: 120px;
-    
-    ${({ $isMinimized, theme }) => $isMinimized && `
-      border-radius: 0 0 ${theme.borderRadius.sm} ${theme.borderRadius.sm};
-      border-top: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      animation: pulse 2s infinite;
+    z-index: ${({ theme }) => theme.zIndex.sidebar -1 };
+    min-width: 80px;
+    font-size: 0.95rem;
+    padding: 4px 12px;
+    box-shadow: none;
+    border: none;
+    background: ${({ theme, $isMinimized }) => $isMinimized ? theme.colors.primary : theme.colors.surface};
+    color: ${({ theme, $isMinimized }) => $isMinimized ? theme.colors.surface : theme.colors.text};
+    border-radius: 16px;
+        top: ${({ $isMinimized, $toolbar, $currentQuill }) => $isMinimized 
+      ? `calc(var(--header-height, ${($toolbar == true && $currentQuill == true) ? '102px' : '56px'}) + 8px)`
+      : `calc(var(--sidebar-height, 70vh) + 8px)`};
+
+    /* Usa variáveis CSS para garantir responsividade. Ajuste --header-height e --toolbar-height no layout principal. */
+    transition: all 0.1s;
+    ${({ $isMinimized }) => $isMinimized && `
+      font-weight: 600;
+      box-shadow: none;
+      border: none;
+      animation: none;
     `}
   }
 

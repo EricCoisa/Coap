@@ -7,6 +7,7 @@ import Switch from '../../../switch/switch';
 import { AddObject, SetToolbar, SetInsertMode } from '../../../../store/application/actions/applicationAction';
 import { ObjectButton } from './components/objectButton';
 import type { AnyObject } from '../../../../types/objects';
+import { useSidebar } from '../../../../hooks/useSidebar';
 
 const connector = connectUtil(
   (state: RootStateBase) => ({
@@ -22,6 +23,7 @@ export interface ToolsProps extends BaseComponentProps, PropsFromRedux<typeof co
 }
 
 function ToolsComponent(props : ToolsProps) {
+  const { setIsMinimized } = useSidebar();
 
    function handleToolbar() {
     props.SetToolbar(!props.toolbar);
@@ -29,6 +31,9 @@ function ToolsComponent(props : ToolsProps) {
 
   // Função para ativar modo de inserção (agora para mobile E desktop)
   function handleInsertModeClick(object: AnyObject) {
+    // Detectar se é mobile para fechar sidebar automaticamente
+    const isMobile = window.matchMedia('(max-width: 900px)').matches;
+    
     // SEMPRE usar modo de inserção (tanto mobile quanto desktop)
     if (props.insertMode?.isActive && props.insertMode?.selectedObject?.id === object.id) {
       // Se já está no modo de inserção com o mesmo objeto, desativa
@@ -36,6 +41,11 @@ function ToolsComponent(props : ToolsProps) {
     } else {
       // Ativa o modo de inserção com este objeto
       props.SetInsertMode(true, object);
+      
+      // 📱 MOBILE: Fechar sidebar automaticamente após seleção para melhor UX
+      if (isMobile) {
+        setIsMinimized(true);
+      }
     }
   }
 

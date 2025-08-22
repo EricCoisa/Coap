@@ -15,7 +15,9 @@ interface SidebarProviderProps {
 }
 
 export function SidebarProvider({ children }: SidebarProviderProps) {
-  const [isMinimized, setIsMinimized] = useState(false);
+  // Sidebar inicia fechado no mobile, aberto no desktop
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+  const [isMinimized, setIsMinimized] = useState(isMobile);
 
   const value = {
     isMinimized,

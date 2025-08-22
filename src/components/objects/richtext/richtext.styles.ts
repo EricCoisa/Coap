@@ -105,8 +105,8 @@ export const RichTextContainer = styled.div<{ toolbarState: boolean }>`
         }
         
         .ql-picker-options {
-          max-height: 200px;
-          overflow-y: auto;
+          max-height: 200px !important;
+          overflow-y: auto !important;
           
           .ql-picker-item {
             padding: 8px 12px !important;
@@ -233,7 +233,7 @@ export const RichTextContainer = styled.div<{ toolbarState: boolean }>`
     @media (max-width: 900px) {
       left: 0 !important;
       right: 0 !important;
-      top: 104px !important; /* Header + sidebar colapsada */
+      top: 63px !important; /* Header + sidebar colapsada */
       width: 100% !important;
     }
 

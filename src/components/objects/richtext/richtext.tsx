@@ -3,8 +3,6 @@ import Quill, { Delta } from 'quill';
 import 'quill/dist/quill.snow.css';
 // Importar módulos específicos do Quill para garantir funcionalidade
 import 'quill/dist/quill.core.css';
-// Importar estilos mobile personalizados
-import './quill-mobile.css';
 import './quill-mobile-width.css';
 import { RichTextContainer } from './richtext.styles';
 import type { ObjectMode } from '../../../types/objects';
@@ -217,6 +215,8 @@ function RichText(props: RichTextProps) {
         setQuillContent(quillInstance.current, currentValue.current);
       }
 
+
+
       // Aplicar estilo inicial se definido - apenas no modo edit
       if (props.defaultStyle && mode === 'edit') {
         setTimeout(() => {
@@ -250,7 +250,7 @@ function RichText(props: RichTextProps) {
             console.log('setValueRef.current:', setValueRef.current);
             
             // Converter Delta para objeto serializável
-            const serializableDelta = {
+            const serializableDelta = { 
               ops: deltaContents.ops ? JSON.parse(JSON.stringify(deltaContents.ops)) : []
             };
             

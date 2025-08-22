@@ -7,7 +7,7 @@ export interface ObjectButtonProps {
   isInsertMode?: boolean;
 }
 
-// Componente para cada botão de objeto - APENAS CLICK (sem drag)
+// Componente para cadla botão de objeto - APENAS CLICK (sem drag)
 export function ObjectButton({ obj, handleAddObject, isSelected = false, isInsertMode = false }: ObjectButtonProps) {
     function handleAddObjectClick(obj: AnyObject) {
       return () => handleAddObject(obj);
