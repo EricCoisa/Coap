@@ -58,6 +58,8 @@ function App(props: PropsFromRedux<typeof connector>) {
     const url = new URL(window.location.href);
     url.searchParams.delete('code');
     window.history.replaceState({}, '', url.toString());
+
+    props.SetViewMode('preview')
     }
   }
 
