@@ -62,7 +62,10 @@ export const InitialObjects = [
     label: 'Tópico',
     icon: '🗂️',
     data: {
-      topics: ['Exemplo de Tópico 1', 'Exemplo de Tópico 2']
+      topics: [
+        { content: 'Exemplo de Tópico 1' },
+        { content: 'Exemplo de Tópico 2' }
+      ]
     } as TopicData
   }
 
