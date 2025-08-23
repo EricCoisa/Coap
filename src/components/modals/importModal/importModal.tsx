@@ -24,8 +24,16 @@ function transformObjectsToQuill(objects: any[]) {
           ]
         };
       }
-      // source (para imagens)
+      // source (para imagens e tópicos)
       if (typeof newObj.data.source === 'string') {
+        newObj.data.source = {
+          ops: [
+            { insert: newObj.data.source + '\n' }
+          ]
+        };
+      }
+      // source para tópicos
+      if (newObj.type === 'topic' && typeof newObj.data.source === 'string') {
         newObj.data.source = {
           ops: [
             { insert: newObj.data.source + '\n' }

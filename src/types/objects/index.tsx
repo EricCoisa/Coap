@@ -7,8 +7,10 @@ import type { TitleData } from "../../components/objects/title/title.tsx";
 import type { ImageData } from "../../components/objects/image/image.tsx";
 import type { TopicData } from "../../components/objects/topic/topic.tsx";
 import Topic from "../../components/objects/topic/topic.tsx";
+import type { VideoData } from "../../components/objects/video/video.tsx";
+import Video from "../../components/objects/video/video.tsx";
 
-export type ObjectType = 'title' | 'text' | 'image' | 'topic';
+export type ObjectType = 'title' | 'text' | 'image' | 'topic' | 'video';
 
 export interface Object<T = Record<string, unknown>> {
   id: string;
@@ -19,7 +21,7 @@ export interface Object<T = Record<string, unknown>> {
 }
 
 // Tipo para aceitar diferentes tipos de data no InitialObjects
-export type AnyObject = Object<TextData> | Object<Record<string, unknown>>;
+export type AnyObject = Object<TextData> | Object<Record<string, unknown>> | Object<VideoData>;
 
 // Lista de tipos de objetos disponíveis na paleta (não são instâncias)
 export const InitialObjects = [
@@ -67,6 +69,18 @@ export const InitialObjects = [
         { content: 'Exemplo de Tópico 2' }
       ]
     } as TopicData
+  },
+  {
+    id: "4",
+    type: 'video' as ObjectType,
+    label: 'Vídeo',
+    icon: '🎬',
+    data: {
+      videoUrl: '',
+      videoTitle: '',
+      videoWidth: '100%',
+      videoHeight: '315'
+    } as VideoData
   }
 
 ] as AnyObject[];
@@ -85,6 +99,10 @@ export const ObjectElements = [
   }, {
     type: 'topic' as ObjectType,
     element: Topic,
+  },
+  {
+    type: 'video' as ObjectType,
+    element: Video,
   }
 ] as ObjectElement[];
 
