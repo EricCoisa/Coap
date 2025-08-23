@@ -23,6 +23,7 @@ export interface HeaderProps extends PropsFromRedux<typeof connector> {
   onReset?: () => void;
   onExport?: () => void;
   onImport?: () => void;
+  onShare?: () => void;
   className?: string;
 }
 
@@ -73,6 +74,11 @@ function Header(props : HeaderProps) {
           {props.currentMode === 'preview' && props.onExport && (
             <ActionButton onClick={props.onExport}>
               Exportar
+            </ActionButton>
+          )}
+             {props.currentMode === 'preview' && props.onShare && (
+            <ActionButton onClick={props.onShare}>
+              Compartilhar
             </ActionButton>
           )}
         </Actions>

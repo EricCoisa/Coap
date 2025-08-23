@@ -16,6 +16,9 @@ import { useEffect, useState } from 'react'
 import Modal from './components/modal/modal'
 import ImportModal from './components/modals/importModal/importModal';
 import Resetodal from './components/modals/resetModal/resetModal';
+import ShareModal from './components/modals/shareModal/shareModal';
+import { decodeJson } from './utils/shareUtil';
+import type { AnyObject } from './types/objects';
 
 const connector = connectUtil(
   (_state: RootStateBase) => ({
@@ -26,21 +29,35 @@ const connector = connectUtil(
 );
 
 function App(props: PropsFromRedux<typeof connector>) {
-    const { objectused } = props;
-    const [firstTime, setFirstTime] = useState(false);
-    const [importModal, setImportModal] = useState(false);
-    const [resetModal, setResetModal] = useState(false);
+  const { objectused } = props;
+  const [firstTime, setFirstTime] = useState(false);
+  const [importModal, setImportModal] = useState(false);
+  const [resetModal, setResetModal] = useState(false);
+  const [shareModal, setShareModal] = useState(false);
 
-    function handleCloseModal() {
-      setFirstTime(false);
-    }
+  function handleCloseModal() {
+    setFirstTime(false);
+  }
 
   useEffect(() => {
-    props.LoadObjects();
-    setFirstTime(LoadFirstTime())
+
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code) {
+      FromCode(code);
+    } else {
+      props.LoadObjects();
+      setFirstTime(LoadFirstTime())
+    }
   }, []);
 
-  function handleLoadTemplate(){
+  function FromCode(code: string) {
+    const decoded = decodeJson<AnyObject[]>(code);
+    if (decoded) {
+      props.LoadObjects(decoded);
+    }
+  }
+
+  function handleLoadTemplate() {
     fetch('/template.json')
       .then(res => res.json())
       .then(json => {
@@ -131,20 +148,28 @@ function App(props: PropsFromRedux<typeof connector>) {
     setImportModal(true)
   }
 
-    function handleCloseImportModal() {
+  function handleCloseImportModal() {
     setImportModal(false)
   }
 
 
-  
+
   function handleResetModal() {
     setResetModal(true)
   }
 
-    function handleCloseResetModal() {
+  function handleCloseResetModal() {
     setResetModal(false)
   }
 
+
+  function handleShareModal() {
+    setShareModal(true)
+  }
+
+  function handleCloseShare() {
+    setShareModal(false)
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -158,24 +183,29 @@ function App(props: PropsFromRedux<typeof connector>) {
           onReset={handleResetModal}
           onExport={handleExport}
           onImport={handleImport}
+          onShare={handleShareModal}
         />
         {props.viewMode === 'editor' ? (
           <Editor />
         ) : (
           <Preview />
         )}
-   
-            <Modal size='lg' onClose={handleCloseModal} isOpen={firstTime}>
-              <FirstTimeModal onAccept={handleLoadTemplate} onDeny={handleCloseModal} />
-            </Modal>
 
-            <Modal size='lg' onClose={handleCloseImportModal} isOpen={importModal}>
-              <ImportModal onClose={handleCloseImportModal}></ImportModal>
-            </Modal>
+        <Modal size='lg' onClose={handleCloseModal} isOpen={firstTime}>
+          <FirstTimeModal onAccept={handleLoadTemplate} onDeny={handleCloseModal} />
+        </Modal>
 
-            <Modal size='lg' onClose={handleCloseResetModal} isOpen={resetModal}>
-              <Resetodal onAccept={handleReset} onDeny={handleCloseResetModal}></Resetodal>
-            </Modal>
+        <Modal size='lg' onClose={handleCloseImportModal} isOpen={importModal}>
+          <ImportModal onClose={handleCloseImportModal}></ImportModal>
+        </Modal>
+
+        <Modal size='lg' onClose={handleCloseResetModal} isOpen={resetModal}>
+          <Resetodal onAccept={handleReset} onDeny={handleCloseResetModal}></Resetodal>
+        </Modal>
+
+        <Modal size='lg' onClose={handleCloseShare} isOpen={shareModal}>
+          <ShareModal onClose={handleCloseShare}></ShareModal>
+        </Modal>
       </SidebarProvider>
     </ThemeProvider>
   )
