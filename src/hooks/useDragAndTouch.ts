@@ -81,7 +81,6 @@ export function useDragAndTouch({ onDragStart, onDragEnd, data }: UseDragAndTouc
 
   // Eventos de drag para desktop
   const handleDragStart = useCallback((e: React.DragEvent<HTMLElement>) => {
-    console.log('🚀 Desktop Drag Start');
     e.dataTransfer.setData('sidebarObjectData', data);
     e.dataTransfer.effectAllowed = 'copy';
     
@@ -94,7 +93,6 @@ export function useDragAndTouch({ onDragStart, onDragEnd, data }: UseDragAndTouc
   }, [data, onDragStart]);
 
   const handleDragEnd = useCallback(() => {
-    console.log('🏁 Desktop Drag End');
     globalDragState.isDragging = false;
     globalDragState.isSidebarDrag = false;
     globalDragState.draggedObjectId = null;
@@ -120,7 +118,6 @@ export function useDragAndTouch({ onDragStart, onDragEnd, data }: UseDragAndTouc
     
     // Iniciar drag se movimento for suficiente
     if (!isDragging.current && (deltaX > 10 || deltaY > 10)) {
-      console.log('📱 Touch Drag Start');
       isDragging.current = true;
       
       // Atualizar estado global
@@ -148,7 +145,6 @@ export function useDragAndTouch({ onDragStart, onDragEnd, data }: UseDragAndTouc
 
   const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLElement>) => {
     if (isDragging.current) {
-      console.log('🏁 Touch Drag End');
       const touch = e.changedTouches[0];
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
       

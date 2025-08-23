@@ -51,7 +51,6 @@ function BaseObject(props: BaseObjectProps) {
     e.currentTarget.style.transform = 'scale(1)';
   }
 
-console.log(props.mode, "MODO")
   return (
     <DragObject isTimeLine={false} index={props.index} mode={props.mode} object={props.object}>
       <BaseObjectContainer>

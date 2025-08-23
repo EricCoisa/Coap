@@ -148,7 +148,6 @@ function DragObject(props: BaseObjectProps) {
   }
 
   function handleDragStart(e: React.DragEvent<HTMLButtonElement>) {
-    console.log(`🚀 Drag Start - Objeto ${props.object.id}`);
     setIsDragging(true);
     globalDragState.isDragging = true;
     globalDragState.draggedObjectId = props.object.id;
@@ -160,7 +159,6 @@ function DragObject(props: BaseObjectProps) {
   }
 
   function handleDragEnd() {
-    console.log(`🏁 Drag End - Objeto ${props.object.id}`);
     setIsDragging(false);
     setShowDropZones(false);
     setActiveDropZone(null);

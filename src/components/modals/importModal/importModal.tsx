@@ -38,14 +38,13 @@ function transformObjectsToQuill(objects: any[]) {
 }
 import React, { useState } from 'react';
 import { connectUtil, type PropsFromRedux } from '../../../utils/reduxUtil';
-import type { RootStateBase } from '../../../store/rootReducer';
 import { LoadObjects } from '../../../store/application/actions/applicationAction';
 import { ImportModalContainer, ImportTextarea, ImportButton, CancelButton, ExempleButton } from './import.styles';
 import Modal from '../../modal/modal';
 import { InitialObjects } from '../../../types/objects';
 
 const connector = connectUtil(
-  (_state: RootStateBase) => ({}),
+  () => ({}),
   { LoadObjects }
 );
 
@@ -65,7 +64,7 @@ function ImportModal(props: ImportModalProps) {
       props.LoadObjects(parsed);
       setError(null);
       props.onClose();
-    } catch (e) {
+    } catch {
       setError('JSON inválido!');
     }
   }

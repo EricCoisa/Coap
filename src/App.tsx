@@ -129,26 +129,20 @@ function App(props: PropsFromRedux<typeof connector>) {
 
   function handleImport() {
     setImportModal(true)
-    console.log('Importando conteúdo...')
-    // TODO: Implementar lógica de importação
   }
 
     function handleCloseImportModal() {
     setImportModal(false)
-    // TODO: Implementar lógica de importação
   }
 
 
   
   function handleResetModal() {
     setResetModal(true)
-    console.log('Importando conteúdo...')
-    // TODO: Implementar lógica de importação
   }
 
     function handleCloseResetModal() {
     setResetModal(false)
-    // TODO: Implementar lógica de importação
   }
 
 

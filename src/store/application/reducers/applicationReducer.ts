@@ -65,15 +65,7 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
         }
         case OBJECTSUSED_REMOVE: {
             // Garante que o id comparado é string
-            const removeId = String(action.payload.id);
-            console.log(removeId)   
-
-            const r = {
-                ...state,
-                ObjectsUsed: state.ObjectsUsed ? state.ObjectsUsed.filter((obj: AnyObject) => String(obj.id) !== removeId) : []
-            }
-
-            console.log("r", r)
+            const removeId = String(action.payload.id);            
             return {
                 ...state,
                 ObjectsUsed: state.ObjectsUsed ? state.ObjectsUsed.filter((obj: AnyObject) => String(obj.id) !== removeId) : []
@@ -114,7 +106,7 @@ export function ApplicationReducer(state = INITIAL_STATE, action: ApplicationTyp
             };
         }
         case OBJECTSUSED_EDIT: {
-            console.log("Editando objeto:", action.payload);
+            
             if (!state.ObjectsUsed) return state;
             const { id, data } = action.payload;
             return {

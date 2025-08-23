@@ -7,7 +7,6 @@ const INITIAL_STATE: QuillState = {
 export function QuillReducer(state = INITIAL_STATE, action: QuillTypes): QuillState {
     switch (action.type) {
         case CURRENTQUILL_SET:
-            console.log('Atualizando Quill ID:', action.payload);
             return { ...state, currentQuillId: action.payload };
         default:
             return state;

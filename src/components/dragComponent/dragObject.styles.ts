@@ -149,19 +149,19 @@ export const DropZoneTop = styled.div<{ activeDropZone: 'top' | 'bottom' | null 
 
 // Drop Zone Inferior
 export const DropZoneBottom = styled.div<{ activeDropZone: 'top' | 'bottom' | null }>`
-  height: 32px; /* Reduzido de 40px */
+  height: 32px;
   background: ${props => props.activeDropZone === 'bottom' 
     ? 'linear-gradient(135deg, rgba(0, 122, 204, 0.2), rgba(0, 153, 255, 0.3))'
     : 'linear-gradient(135deg, rgba(0, 122, 204, 0.1), rgba(0, 153, 255, 0.15))'};
   border: 3px dashed #007acc;
   border-radius: 8px;
-  margin-top: -6px; /* Reduzido de -8px */
-  margin-bottom: 12px; /* Reduzido de 16px */
+  margin-top: -6px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #007acc;
-  font-size: 12px; /* Reduzido de 14px */
+  font-size: 12px;
   font-weight: 600;
   box-shadow: ${props => props.activeDropZone === 'bottom' 
     ? '0 6px 20px rgba(0, 122, 204, 0.4)'
@@ -172,7 +172,7 @@ export const DropZoneBottom = styled.div<{ activeDropZone: 'top' | 'bottom' | nu
   transform: ${props => props.activeDropZone === 'bottom' ? 'scale(1.02)' : 'scale(1)'};
 
   @media (max-width: 768px) {
-    height: 28px; /* Ainda menor no mobile */
+    height: 28px;
     font-size: 11px;
     margin-top: -4px;
     margin-bottom: 8px;

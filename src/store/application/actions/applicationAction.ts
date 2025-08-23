@@ -8,9 +8,7 @@ import type { ViewMode } from '../../../types';
 export function Save() {
     try {
         const state = Store.getState();
-        console.log("state", state)
         const objectsUsed = state?.ApplicationReducer?.ObjectsUsed ?? [];
-        console.log("Saving objectsUsed", objectsUsed);
 
             localStorage.setItem('ObjectsUsed', JSON.stringify(objectsUsed));
         
@@ -52,7 +50,6 @@ function SetFirstTime() {
 export function LoadFirstTime() : boolean {
     try {
         const data = localStorage.getItem('FirstTime');
-        console.log("FirstTime", data);
         if (data === 'true') {
             return false;
         }
@@ -137,7 +134,6 @@ export function SetViewMode(mode: ViewMode): AppThunk {
 }
 
 export function SetToolbar(toolbar: boolean): AppThunk {
-    console.log("toolbar", toolbar)
     return async function dispatchSetToolbar(dispatch) {
         dispatch({
             payload: toolbar,

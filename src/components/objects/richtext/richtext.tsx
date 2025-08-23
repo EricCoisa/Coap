@@ -132,8 +132,6 @@ function RichText(props: RichTextProps) {
   const setValueRef = useRef(setValue);
   const currentValue = useRef(value);
 
-  console.log('RichText renderizado - mode:', mode, 'value:', value, 'setValue:', !!setValue);
-
   // Listener para mudanças de tamanho da tela (apenas para detecção inicial)
   useEffect(() => {
     function handleResize() {
@@ -184,20 +182,20 @@ function RichText(props: RichTextProps) {
 
   useEffect(() => {
     const container = containerRef.current;
-    console.log('useEffect Quill - container:', container, 'mode:', mode, 'isQuillInitialized:', isQuillInitialized, 'quillInstance.current:', quillInstance.current);
+  
     
     if (container && !isQuillInitialized && !quillInstance.current) {
-      console.log('Inicializando Quill - primeira vez');
+  
       
       // Verificar se já existe uma instância Quill neste container
       const existingEditor = container.querySelector('.ql-editor');
       if (existingEditor) {
-        console.log('Container já tem Quill órfão, limpando completamente');
+  
         container.innerHTML = ''; // Limpar container completamente
       }
       
       // Criar nova instância do Quill
-      console.log("instantiate")
+  
       quillInstance.current = new Quill(container, {
         theme: mode === 'preview' ? 'bubble' : 'snow',
         modules: mode === 'preview' ? { toolbar: false } : quillModules,
@@ -206,7 +204,7 @@ function RichText(props: RichTextProps) {
         readOnly: mode === 'preview'
       });
 
-      console.log('Quill criado:', quillInstance.current);
+  
 
       // Marcar como inicializado APÓS criar com sucesso
       setIsQuillInitialized(true);
@@ -223,7 +221,7 @@ function RichText(props: RichTextProps) {
         setTimeout(() => {
           if (quillInstance.current && props.defaultStyle) {
             const length = quillInstance.current.getLength();
-            console.log('Aplicando defaultStyle:', props.defaultStyle, 'no conteúdo de length:', length);
+            
             
             if (length > 1) { // > 1 porque Quill sempre tem um \n no final
               quillInstance.current.formatText(0, length - 1, props.defaultStyle as Record<string, unknown>);
@@ -241,14 +239,13 @@ function RichText(props: RichTextProps) {
 
       // Listener para mudanças - apenas no modo edit
       if (mode === 'editor') {
-        console.log('Registrando listener text-change');
+  
         quillInstance.current.on('text-change', () => {
-          console.log('Event text-change disparado!');
+          
           if (quillInstance.current && !isUpdating.current) {
             const html = quillInstance.current.root.innerHTML;
             const deltaContents = quillInstance.current.getContents();
-            console.log('Texto alterado:', html);
-            console.log('setValueRef.current:', setValueRef.current);
+            
             
             // Converter Delta para objeto serializável
             const serializableDelta = { 
@@ -259,15 +256,13 @@ function RichText(props: RichTextProps) {
               values: html,
               delta: serializableDelta
             });
-          } else {
-            console.log('Listener ignorado - isUpdating:', isUpdating.current, 'quillInstance:', !!quillInstance.current);
-          }
+          } 
         });
 
         // Listener para foco - definir como Quill ativo quando clicado/focado
         quillInstance.current.on('selection-change', (range) => {
           if (range && quillId.current) {
-            console.log('Quill focado - definindo como ativo:', quillId.current);
+            
             SetCurrentQuill(quillId.current);
           }
         });
@@ -275,7 +270,7 @@ function RichText(props: RichTextProps) {
         // Função nomeada para o handler de foco
         function handleEditorFocus() {
           if (quillId.current) {
-            console.log('Editor focado - definindo como ativo:', quillId.current);
+            
             SetCurrentQuill(quillId.current);
           }
         }
@@ -297,7 +292,7 @@ function RichText(props: RichTextProps) {
         // Registrar a instância no registry global
         registerQuill(quillId.current, quillInstance.current);
         
-        console.log('Instância Quill registrada com ID:', quillId.current);
+  
       }
     }
 
@@ -314,7 +309,7 @@ function RichText(props: RichTextProps) {
       // No Strict Mode, este cleanup roda após primeira execução
       // MAS só limpamos se realmente vamos desmontar
       if (mode === 'editor' || mode === 'preview') {
-        console.log('Strict Mode cleanup - mantendo instância');
+  
         return; // Não limpar no Strict Mode se ainda estamos em uso
       }
     };
@@ -325,12 +320,12 @@ function RichText(props: RichTextProps) {
   useEffect(() => {
     if (quillInstance.current && isQuillInitialized) {
       const toolbarModule = quillInstance.current.getModule('toolbar');
-      console.log('Atualizando toolbar - toolbarState:', toolbarState, 'toolbarModule:', toolbarModule);
+  
       if (toolbarModule && typeof toolbarModule === 'object' && 'container' in toolbarModule) {
-        console.log('Mostrando/Escondendo toolbar baseado em toolbarState:', toolbarState);
+  
         const toolbarContainer = (toolbarModule as { container: HTMLElement }).container;
         toolbarContainer.classList.toggle('hidden', toolbarState === false);
-        console.log('Toolbar atualizada - estado:', toolbarContainer);
+  
       }
     }
   }, [toolbarState, quillModules, isQuillInitialized]);
@@ -339,7 +334,7 @@ function RichText(props: RichTextProps) {
   useEffect(() => {
     return () => {
       if (quillInstance.current) {
-        console.log('Limpando Quill - unmount');
+  
         quillInstance.current.off('text-change');
         quillInstance.current.off('selection-change');
         
@@ -410,7 +405,7 @@ function RichText(props: RichTextProps) {
               toolbarContainer.classList.remove('hidden');
               toolbarContainer.classList.add('fixed-toolbar');
               
-              console.log('Toolbar do Quill ativo fixada no topo:', props.currentQuillId);
+              
             }
           }
         }
@@ -425,7 +420,7 @@ function RichText(props: RichTextProps) {
           toolbarElement.classList.remove('fixed-toolbar');
         });
         
-        console.log('Todas as toolbars restauradas ao estado padrão');
+  
       }
     }
 

@@ -24,10 +24,6 @@ export interface PreviewProps extends BaseComponentProps, PropsFromRedux<typeof 
 
 function Preview( props : PreviewProps) {
   
-  // Exemplo: buscar os objetos usados do editor (ajuste conforme integração real)
-  // Aqui simula que Preview recebe os mesmos objetos do Editor
-  // Substitua por props.objectsUsed se conectar ao Redux
-
   return (
     <PreviewContainer className={props.className} style={props.style}>
       <PreviewContent>

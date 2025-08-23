@@ -30,17 +30,17 @@ function TimeLineItem(props: TimeLineItemProps) {
       Array.isArray((props.obj.data.content as QuillDelta).ops)
 
     ) {
-      console.log("aaaaaaaaaops");
+  
       // Se for Quill Delta, pega o primeiro insert
       const ops = (props.obj.data.content as QuillDelta).ops;
           
       if (ops.length > 0 && typeof ops[0].insert === 'string') {
-         console.log("bbbbbbb", ops);  
+         
         content = ops[0].insert;
       }
     }
   }
-  console.log("ccccc", content);  
+  
 
   return (
      <DragObject isTimeLine={true} index={props.index} mode={props.mode} object={props.obj}>
