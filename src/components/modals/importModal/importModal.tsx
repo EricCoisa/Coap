@@ -32,11 +32,25 @@ function transformObjectsToQuill(objects: any[]) {
           ]
         };
       }
-      // source para tópicos
-      if (newObj.type === 'topic' && typeof newObj.data.source === 'string') {
-        newObj.data.source = {
+      // topics (para tópicos)
+      if (newObj.type === 'topic' && Array.isArray(newObj.data.topics)) {
+        newObj.data.topics = (newObj.data.topics as TopicItem[]).map(topic => {
+          if (typeof topic.content === 'string') {
+            topic.content = {
+              ops: [
+                { insert: topic.content + '\n' }
+              ]
+            };
+          }
+          return topic;
+        });
+      }
+
+      // source para Video
+      if (newObj.type === 'video' && typeof newObj.data.content === 'string') {
+        newObj.data.content = {
           ops: [
-            { insert: newObj.data.source + '\n' }
+            { insert: newObj.data.content + '\n' }
           ]
         };
       }
@@ -50,6 +64,7 @@ import { LoadObjects } from '../../../store/application/actions/applicationActio
 import { ImportModalContainer, ImportTextarea, ImportButton, CancelButton, ExempleButton } from './import.styles';
 import Modal from '../../modal/modal';
 import { InitialObjects } from '../../../types/objects';
+import type { TopicItem } from '../../objects/topic/topic';
 
 const connector = connectUtil(
   () => ({}),
@@ -72,7 +87,8 @@ function ImportModal(props: ImportModalProps) {
       props.LoadObjects(parsed);
       setError(null);
       props.onClose();
-    } catch {
+    } catch (error) {
+      console.error('Erro ao importar JSON:', error);
       setError('JSON inválido!');
     }
   }

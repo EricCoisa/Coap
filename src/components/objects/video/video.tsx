@@ -17,7 +17,7 @@ import type { Delta } from 'quill';
 
 export interface VideoData {
   videoUrl: string;
-  videoTitle?: Delta | string;
+  content?: Delta | string;
   videoWidth?: string;
   videoHeight?: string;
 }
@@ -61,7 +61,7 @@ function VideoObject(props: VideoProps) {
         {/* Título do vídeo */}
         <div style={{ marginBottom: '0.5rem' }}>
           <RichText
-            value={data.videoTitle || ''}
+            value={data.content || ''}
             setValue={handleTitleChange}
             mode={props.mode}
             toolbar={props.mode === 'editor' ? [
@@ -89,7 +89,7 @@ function VideoObject(props: VideoProps) {
         {/* Renderização especial para impressão */}
         {isPrint ? (
           <div style={{ textAlign: 'center', color: '#333', fontStyle: 'italic', padding: '1rem', border: '1px dashed #ccc', borderRadius: '8px', margin: '1rem 0' }}>
-            Para acessar o vídeo{getTitleText(data.videoTitle ?? '') ? ` - ${getTitleText(data.videoTitle ?? '')}` : ''} acesse: <br />
+            Para acessar o vídeo{getTitleText(data.content ?? '') ? ` - ${getTitleText(data.content ?? '')}` : ''} acesse: <br />
             <span style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>{videoUrl}</span>
           </div>
         ) : (
@@ -97,7 +97,7 @@ function VideoObject(props: VideoProps) {
           videoUrl ? (
             videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
               <iframe
-                title={typeof data.videoTitle === 'string' ? data.videoTitle : 'Vídeo'}
+                title={typeof data.content === 'string' ? data.content : 'Vídeo'}
                 width={data.videoWidth || '100%'}
                 height={data.videoHeight || '315'}
                 src={getYoutubeEmbedUrl(videoUrl)}

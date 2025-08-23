@@ -77,7 +77,7 @@ export const InitialObjects = [
     icon: '🎬',
     data: {
       videoUrl: '',
-      videoTitle: '',
+      content: '',
       videoWidth: '100%',
       videoHeight: '315'
     } as VideoData

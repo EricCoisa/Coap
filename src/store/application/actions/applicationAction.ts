@@ -64,11 +64,14 @@ export function LoadFirstTime() : boolean {
 
 export function LoadObjects(objects? : AnyObject[] | undefined): AppThunk {
     return async function dispatchLoadObjects(dispatch) {
-        
-        const saved = objects ?? Load()
-        if(saved != null){
+        const saved = objects ?? Load();
+        // Clona profundamente para evitar mutação de estado
+        function deepClone<T>(obj: T): T {
+            return obj ? JSON.parse(JSON.stringify(obj)) : obj;
+        }
+        if (saved != null) {
             dispatch({
-                payload: saved,
+                payload: deepClone(saved),
                 type: OBJECTSUSED_SET
             });
         }

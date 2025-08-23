@@ -36,7 +36,7 @@
             "content": {
                 "ops": [
                     {
-                        "insert": "A Programação Orientada a Objetos (POO) é um paradigma de programação que organiza o código em 'objetos', representando entidades do mundo real e suas interações. Cada objeto possui atributos (dados) e métodos (funções), permitindo criar programas mais moduláveis, reutilizáveis e fáceis de manter.\n"
+                        "insert": "A Programação Orientada a Objetos (POO) é um paradigma de programação que organiza o código em torno de objetos. Cada objeto é uma entidade que combina atributos (dados) e métodos (comportamentos). Essa abordagem facilita a modelagem de sistemas complexos, melhora a reutilização de código e promove maior clareza na estrutura do software.\n"
                     }
                 ]
             },
@@ -50,12 +50,12 @@
         "label": "Imagem",
         "icon": "🖼️",
         "data": {
-            "imageUrl": "https://venngage-wordpress.s3.amazonaws.com/uploads/2022/05/Class-Diagram.jpg",
-            "imageAlt": "Diagrama de classes e objetos em POO",
+            "imageUrl": "https://becode.com.br/wp-content/uploads/2016/11/POO-1.png",
+            "imageAlt": "Diagrama representando classes e objetos",
             "source": {
                 "ops": [
                     {
-                        "insert": "Fonte: tasafo\n"
+                        "insert": "Fonte: becode\n"
                     }
                 ]
             },
@@ -66,7 +66,7 @@
                             "color": "#3b82f6",
                             "bold": true
                         },
-                        "insert": "Exemplo de Estrutura POO"
+                        "insert": "Classes e Objetos"
                     },
                     {
                         "attributes": {
@@ -86,19 +86,49 @@
         "data": {
             "topics": [
                 {
-                    "content": "Classes e Objetos: definem a estrutura e comportamento de entidades."
+                    "content": {
+                        "ops": [
+                            {
+                                "insert": "Classe: Define o molde para criar objetos, especificando atributos e métodos.\n"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "content": "Encapsulamento: protege os dados internos do objeto, permitindo acesso controlado."
+                    "content": {
+                        "ops": [
+                            {
+                                "insert": "Objeto: Instância de uma classe que representa uma entidade concreta.\n"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "content": "Herança: permite criar novas classes a partir de classes existentes, promovendo reuso de código."
+                    "content": {
+                        "ops": [
+                            {
+                                "insert": "Encapsulamento: Controla o acesso aos dados internos do objeto, aumentando a segurança.\n"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "content": "Polimorfismo: objetos podem se comportar de formas diferentes ao receberem a mesma mensagem."
+                    "content": {
+                        "ops": [
+                            {
+                                "insert": "Herança: Permite que classes reutilizem atributos e comportamentos de outras classes.\n"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "content": "Abstração: foca apenas nos detalhes essenciais, escondendo informações complexas."
+                    "content": {
+                        "ops": [
+                            {
+                                "insert": "Polimorfismo: Permite que diferentes classes respondam de formas distintas ao mesmo método.\n"
+                            }
+                        ]
+                    }
                 }
             ]
         }
@@ -109,25 +139,29 @@
         "label": "Vídeo",
         "icon": "🎬",
         "data": {
-            "videoUrl": "https://www.youtube.com/watch?v=dXZRgW-X2ls",
+            "videoUrl": "https://www.youtube.com/embed/pTB0EiLXUC8",
+            "content": {
+                "ops": [
+                    {
+                        "insert": "Vídeo introdutório sobre os conceitos básicos de POO em Java.\n"
+                    }
+                ]
+            },
+            "videoWidth": "100%",
+            "videoHeight": "315",
             "videoTitle": {
                 "ops": [
                     {
                         "attributes": {
                             "bold": true
                         },
-                        "insert": "Introdução à Programação Orientada a Objetos"
+                        "insert": "Vídeo introdutório sobre os conceitos básicos de POO em Java."
                     },
                     {
-                        "attributes": {
-                            "align": "center"
-                        },
                         "insert": "\n"
                     }
                 ]
-            },
-            "videoWidth": "100%",
-            "videoHeight": "315"
+            }
         }
     }
 ]
