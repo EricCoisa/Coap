@@ -54,6 +54,10 @@ function App(props: PropsFromRedux<typeof connector>) {
     const decoded = decodeJson<AnyObject[]>(code);
     if (decoded) {
       props.LoadObjects(decoded);
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete('code');
+    window.history.replaceState({}, '', url.toString());
     }
   }
 
@@ -85,9 +89,9 @@ function App(props: PropsFromRedux<typeof connector>) {
   }
 
   function handleReset() {
-    setResetModal(false)
-    Limpar()
-    props.LoadObjects([])
+    setResetModal(false);
+    Limpar();
+    props.LoadObjects([]);
   }
 
   function handleExport() {
