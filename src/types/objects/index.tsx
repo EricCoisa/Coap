@@ -5,8 +5,10 @@ import Image from "../../components/objects/image/image.tsx";
 import type { TextData } from "../../components/objects/text/text.tsx";
 import type { TitleData } from "../../components/objects/title/title.tsx";
 import type { ImageData } from "../../components/objects/image/image.tsx";
+import type { TopicData } from "../../components/objects/topic/topic.tsx";
+import Topic from "../../components/objects/topic/topic.tsx";
 
-export type ObjectType = 'title' | 'text' | 'image';
+export type ObjectType = 'title' | 'text' | 'image' | 'topic';
 
 export interface Object<T = Record<string, unknown>> {
   id: string;
@@ -53,8 +55,17 @@ export const InitialObjects = [
       source: "Fonte:Local",
       title: "Título da Imagem"
     } as ImageData
+  },
+  {
+    id: "3",
+    type: 'topic' as ObjectType,
+    label: 'Tópico',
+    icon: '🗂️',
+    data: {
+      topics: ['Exemplo de Tópico 1', 'Exemplo de Tópico 2']
+    } as TopicData
   }
-  
+
 ] as AnyObject[];
 
 
@@ -68,6 +79,9 @@ export const ObjectElements = [
   }, {
     type: 'image' as ObjectType,
     element: Image,
+  }, {
+    type: 'topic' as ObjectType,
+    element: Topic,
   }
 ] as ObjectElement[];
 

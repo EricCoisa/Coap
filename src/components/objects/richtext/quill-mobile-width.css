@@ -31,7 +31,6 @@
     margin: 0 !important;
     font-size: 16px !important; /* Evita zoom automático iOS */
     line-height: 1.5 !important;
-    min-height: 120px !important;
   }
 
   /* Toolbar - aproveitar toda largura */
