@@ -22,7 +22,7 @@ O **Coap** é uma ferramenta visual drag-and-drop para criação de conteúdos e
 
 ## 🎥 Demo
 
-![Coap Demo](./demo.gif)
+[Coap]([https://www.openai.com](https://coap.ericvitor.com.br/))
 
 *Editor visual com objetos sendo adicionados e editados em tempo real*
 
